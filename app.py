@@ -102,26 +102,88 @@ st.markdown("""
         color: #1a1a2e !important;
     }
 
-    /* Dropdown menu options */
+    /* Dropdown menu options - FULL FIX */
     [data-baseweb="popover"] {
         background: white !important;
+        background-color: white !important;
+    }
+
+    [data-baseweb="popover"] > div {
+        background: white !important;
+        background-color: white !important;
     }
 
     [data-baseweb="popover"] li {
         color: #1a1a2e !important;
+        background: white !important;
     }
 
     [data-baseweb="popover"] li:hover {
-        background: #f0f0f0 !important;
+        background: #e9ecef !important;
+        background-color: #e9ecef !important;
     }
 
-    /* Select menu list */
+    /* Select menu list - FULL FIX */
     [data-baseweb="menu"] {
         background: white !important;
+        background-color: white !important;
+    }
+
+    [data-baseweb="menu"] > div {
+        background: white !important;
+        background-color: white !important;
+    }
+
+    [data-baseweb="menu"] ul {
+        background: white !important;
+        background-color: white !important;
+    }
+
+    [data-baseweb="menu"] li {
+        background: white !important;
+        background-color: white !important;
+        color: #1a1a2e !important;
+    }
+
+    [data-baseweb="menu"] li:hover {
+        background: #e9ecef !important;
+        background-color: #e9ecef !important;
     }
 
     [data-baseweb="menu"] * {
         color: #1a1a2e !important;
+    }
+
+    /* Listbox dropdown */
+    [data-baseweb="listbox"] {
+        background: white !important;
+        background-color: white !important;
+    }
+
+    [data-baseweb="listbox"] li {
+        background: white !important;
+        color: #1a1a2e !important;
+    }
+
+    [data-baseweb="listbox"] li:hover {
+        background: #e9ecef !important;
+    }
+
+    /* Option in select */
+    [role="option"] {
+        background: white !important;
+        background-color: white !important;
+        color: #1a1a2e !important;
+    }
+
+    [role="option"]:hover {
+        background: #e9ecef !important;
+        background-color: #e9ecef !important;
+    }
+
+    [role="listbox"] {
+        background: white !important;
+        background-color: white !important;
     }
 
     /* Selectbox input area */
@@ -132,6 +194,15 @@ st.markdown("""
 
     [data-testid="stSelectbox"] [data-baseweb="select"] > div > div {
         color: #1a1a2e !important;
+    }
+
+    /* Force all dropdown backgrounds white */
+    div[data-baseweb="popover"] div[data-baseweb="menu"] {
+        background: white !important;
+    }
+
+    div[data-baseweb="select"] + div {
+        background: white !important;
     }
 
     /* Slider - force all text white */
@@ -491,6 +562,23 @@ def show_role_selection():
                 st.session_state.page = 'admin_login'
                 st.rerun()
 
+    # Quick Attendance Section - Same row as portals for consistency
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<p style='color:rgba(255,255,255,0.6);text-align:center;font-size:14px;margin-bottom:15px;'>— OR —</p>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div class="role-card">
+            <div class="role-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">F</div>
+            <div class="role-title">Quick Attendance</div>
+            <div class="role-desc">Scan your face to mark attendance instantly without logging in</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Scan Face Now", key="quick_attendance_btn", use_container_width=True):
+            st.session_state.page = 'quick_attendance'
+            st.rerun()
+
 
 def show_student_login():
     """Show student login page"""
@@ -565,10 +653,11 @@ def show_student_register():
                 email = st.text_input("Email")
             with col_b:
                 phone = st.text_input("Phone")
-                department = st.selectbox("Department", [
-                    "", "Computer Science", "Electrical Engineering",
-                    "Mechanical Engineering", "Civil Engineering", "Other"
-                ])
+                dept_options = ["", "Computer Science", "Software Engineering", "Electrical Engineering",
+                    "Mechanical Engineering", "Civil Engineering", "Other (Custom)"]
+                department = st.selectbox("Department", dept_options)
+                if department == "Other (Custom)":
+                    department = st.text_input("Enter Department Name")
                 batch = st.text_input("Batch/Year")
 
             col_c, col_d = st.columns(2)
@@ -1006,10 +1095,15 @@ def show_edit_profile():
             phone = st.text_input("Phone", value=student.phone or "")
 
         with col2:
-            department = st.selectbox("Department",
-                ["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"],
-                index=["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"].index(student.department) if student.department in ["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"] else 0
-            )
+            dept_options = ["", "Computer Science", "Software Engineering", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other (Custom)"]
+            current_dept = student.department or ""
+            if current_dept in dept_options:
+                dept_idx = dept_options.index(current_dept)
+            else:
+                dept_idx = dept_options.index("Other (Custom)")
+            department = st.selectbox("Department", dept_options, index=dept_idx, key="edit_dept")
+            if department == "Other (Custom)":
+                department = st.text_input("Enter Department Name", value=current_dept if current_dept not in dept_options else "")
             batch = st.text_input("Batch/Year", value=student.batch or "")
             semester = st.selectbox("Semester",
                 ["", "1", "2", "3", "4", "5", "6", "7", "8"],
@@ -1230,10 +1324,15 @@ def show_admin_edit_student():
             batch = st.text_input("Batch/Year", value=student.batch or "")
 
         with col2:
-            department = st.selectbox("Department",
-                ["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"],
-                index=["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"].index(student.department) if student.department in ["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"] else 0
-            )
+            dept_options = ["", "Computer Science", "Software Engineering", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other (Custom)"]
+            current_dept = student.department or ""
+            if current_dept in dept_options:
+                dept_idx = dept_options.index(current_dept)
+            else:
+                dept_idx = dept_options.index("Other (Custom)")
+            department = st.selectbox("Department", dept_options, index=dept_idx, key="admin_edit_dept")
+            if department == "Other (Custom)":
+                department = st.text_input("Enter Department Name", value=current_dept if current_dept not in dept_options else "", key="admin_custom_dept")
             semester = st.selectbox("Semester",
                 ["", "1", "2", "3", "4", "5", "6", "7", "8"],
                 index=["", "1", "2", "3", "4", "5", "6", "7", "8"].index(student.semester) if student.semester in ["", "1", "2", "3", "4", "5", "6", "7", "8"] else 0
@@ -1482,6 +1581,134 @@ def train_model():
         st.error(f"Error: {str(e)}")
 
 
+def show_quick_attendance():
+    """Quick attendance marking without login"""
+    st.markdown("""
+    <div style="text-align:center;padding:30px 0;">
+        <h1 style="color:white;font-size:32px;margin-bottom:10px;">Quick Attendance</h1>
+        <p style="color:rgba(255,255,255,0.7);">Face scan to mark your attendance</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    model_path = TRAINED_MODELS_DIR / "face_encodings.pkl"
+    if not model_path.exists():
+        st.error("Face recognition model not trained yet. Please contact admin.")
+        if st.button("Back to Home", use_container_width=True):
+            st.session_state.page = 'role_select'
+            st.rerun()
+        return
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Start Face Scan", type="primary", use_container_width=True):
+            run_quick_attendance()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("Back to Home", use_container_width=True):
+            st.session_state.page = 'role_select'
+            st.rerun()
+
+
+def run_quick_attendance():
+    """Run quick attendance recognition"""
+    try:
+        import cv2
+        import face_recognition
+        import pickle
+        import numpy as np
+        import time
+
+        model_path = TRAINED_MODELS_DIR / "face_encodings.pkl"
+        with open(model_path, 'rb') as f:
+            data = pickle.load(f)
+
+        known_encodings = [np.array(enc) for enc in data['encodings']]
+        known_ids = data['ids']
+        known_names = data['names']
+
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            st.error("Could not open camera")
+            return
+
+        camera_placeholder = st.empty()
+        result_placeholder = st.empty()
+        status_placeholder = st.empty()
+
+        status_placeholder.info("Looking for your face... Please look at the camera.")
+
+        attendance_marked = False
+        start_time = time.time()
+        timeout = 30  # 30 seconds timeout
+
+        while not attendance_marked and (time.time() - start_time) < timeout:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            frame = cv2.flip(frame, 1)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            face_locations = face_recognition.face_locations(rgb_frame, model='hog')
+
+            if face_locations:
+                face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+                for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                    distances = face_recognition.face_distance(known_encodings, face_encoding)
+
+                    if len(distances) > 0:
+                        min_distance = np.min(distances)
+                        best_idx = np.argmin(distances)
+
+                        if min_distance < 0.5:
+                            matched_id = known_ids[best_idx]
+                            matched_name = known_names[best_idx]
+
+                            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 3)
+                            cv2.putText(frame, matched_name, (left, top-10),
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+
+                            # Check if student exists
+                            student = StudentOperations.get_student(matched_id)
+                            if student:
+                                # Check if already marked today
+                                if AttendanceOperations.check_attendance_exists(matched_id):
+                                    status_placeholder.warning(f"Attendance already marked for {matched_name} today!")
+                                else:
+                                    success, msg = AttendanceOperations.mark_attendance(matched_id, 1-min_distance, 'Present')
+                                    if success:
+                                        status_placeholder.success(f"Attendance marked successfully for {matched_name}!")
+                                    else:
+                                        status_placeholder.error(f"Failed to mark attendance: {msg}")
+                                attendance_marked = True
+                        else:
+                            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 3)
+                            cv2.putText(frame, "Unknown", (left, top-10),
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            camera_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
+
+        cap.release()
+
+        if not attendance_marked:
+            status_placeholder.error("Face not recognized. Please ensure you are registered in the system.")
+
+        # Show back button after completion
+        time.sleep(2)
+        st.info("Redirecting to home page...")
+        time.sleep(1)
+        st.session_state.page = 'role_select'
+        st.rerun()
+
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        if st.button("Back to Home"):
+            st.session_state.page = 'role_select'
+            st.rerun()
+
+
 def show_admin_mark():
     """Admin mark attendance"""
     with st.sidebar:
@@ -1593,7 +1820,10 @@ def show_admin_register():
             email = st.text_input("Email")
             phone = st.text_input("Phone")
         with col2:
-            department = st.selectbox("Department", ["", "Computer Science", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other"])
+            dept_options = ["", "Computer Science", "Software Engineering", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Other (Custom)"]
+            department = st.selectbox("Department", dept_options, key="admin_reg_dept")
+            if department == "Other (Custom)":
+                department = st.text_input("Enter Department Name", key="admin_reg_custom_dept")
             batch = st.text_input("Batch")
             semester = st.selectbox("Semester", ["", "1", "2", "3", "4", "5", "6", "7", "8"])
             section = st.text_input("Section")
@@ -1631,6 +1861,8 @@ def main():
         # Role selection and login pages
         if page == 'role_select':
             show_role_selection()
+        elif page == 'quick_attendance':
+            show_quick_attendance()
         elif page == 'student_login':
             show_student_login()
         elif page == 'student_register':
