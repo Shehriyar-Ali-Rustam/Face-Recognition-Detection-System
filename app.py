@@ -1202,6 +1202,9 @@ def show_admin_dashboard():
         if st.button("Train Model", use_container_width=True):
             st.session_state.page = 'admin_train'
             st.rerun()
+        if st.button("Upload Photos", use_container_width=True):
+            st.session_state.page = 'admin_upload_photos'
+            st.rerun()
         if st.button("Mark Attendance", use_container_width=True):
             st.session_state.page = 'admin_mark'
             st.rerun()
@@ -1581,6 +1584,212 @@ def train_model():
         st.error(f"Error: {str(e)}")
 
 
+def show_admin_upload_photos():
+    """Upload photos for face training - more accurate than camera capture"""
+    with st.sidebar:
+        if st.button("Back", use_container_width=True):
+            st.session_state.page = 'admin_dashboard'
+            st.rerun()
+
+    st.markdown('<div class="header-bar"><h2 style="margin:0;">Upload Photos for Training</h2></div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="stat-card" style="text-align:left;margin-bottom:20px;background:#e8f5e9;">
+        <strong style="color:#2e7d32;">High Accuracy Training</strong><br>
+        <span style="color:#555;font-size:14px;">Upload clear face photos for better recognition accuracy.
+        Photos are validated for quality (blur, brightness, face size) before training.</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    students = StudentOperations.get_all_students()
+
+    if not students:
+        st.warning("No students registered. Please register students first.")
+        return
+
+    student_options = {s.student_id: f"{s.name} ({s.student_id})" for s in students}
+    selected_id = st.selectbox("Select Student", list(student_options.keys()),
+                               format_func=lambda x: student_options[x])
+
+    if selected_id:
+        student = StudentOperations.get_student(selected_id)
+        folder = DATASET_DIR / selected_id
+        existing = len(list(folder.glob('*.jpg')) + list(folder.glob('*.png')) + list(folder.glob('*.jpeg'))) if folder.exists() else 0
+
+        st.info(f"Current images for {student.name}: {existing}")
+
+        st.markdown("---")
+        st.markdown("**Upload Face Photos**")
+        st.markdown("""
+        <span style="color:#666;font-size:13px;">
+        Tips for best results:
+        • Upload 10-20 clear face photos from different angles
+        • Good lighting, no heavy shadows
+        • Face should be clearly visible and centered
+        • Avoid blurry or dark photos
+        </span>
+        """, unsafe_allow_html=True)
+
+        uploaded_files = st.file_uploader(
+            "Choose photos (JPG, PNG)",
+            type=['jpg', 'jpeg', 'png'],
+            accept_multiple_files=True,
+            key="photo_uploader"
+        )
+
+        if uploaded_files:
+            st.markdown(f"**{len(uploaded_files)} photos selected**")
+
+            # Preview uploaded images
+            cols = st.columns(5)
+            for i, file in enumerate(uploaded_files[:10]):  # Show first 10 previews
+                with cols[i % 5]:
+                    st.image(file, use_container_width=True)
+
+            if len(uploaded_files) > 10:
+                st.caption(f"...and {len(uploaded_files) - 10} more")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                save_only = st.button("Save Photos Only", use_container_width=True)
+            with col2:
+                save_and_train = st.button("Save & Train Model", type="primary", use_container_width=True)
+
+            if save_only or save_and_train:
+                process_uploaded_photos(selected_id, student.name, uploaded_files, train_after=save_and_train)
+
+
+def process_uploaded_photos(student_id: str, student_name: str, uploaded_files, train_after: bool = False):
+    """Process and save uploaded photos, optionally train model"""
+    import cv2
+    import numpy as np
+    from PIL import Image
+    import io
+
+    try:
+        folder = DATASET_DIR / student_id
+        folder.mkdir(parents=True, exist_ok=True)
+
+        existing_count = len(list(folder.glob('*.jpg')) + list(folder.glob('*.png')) + list(folder.glob('*.jpeg')))
+
+        progress = st.progress(0)
+        status = st.empty()
+
+        saved_count = 0
+        rejected_count = 0
+        saved_images = []
+
+        for i, uploaded_file in enumerate(uploaded_files):
+            status.info(f"Processing {uploaded_file.name}...")
+
+            # Read image
+            image_bytes = uploaded_file.read()
+            pil_image = Image.open(io.BytesIO(image_bytes))
+
+            # Convert to RGB if necessary
+            if pil_image.mode != 'RGB':
+                pil_image = pil_image.convert('RGB')
+
+            # Convert to numpy array (BGR for OpenCV)
+            image = np.array(pil_image)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+            # Import face recognition for validation
+            import face_recognition
+            from utils.face_recognizer import FaceQualityValidator
+
+            validator = FaceQualityValidator()
+
+            # Check image quality
+            is_quality_ok, quality_report = validator.validate_face_image(image)
+
+            if not is_quality_ok:
+                rejected_count += 1
+                continue
+
+            # Check for face
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            face_locations = face_recognition.face_locations(rgb_image, model='hog')
+
+            if not face_locations:
+                rejected_count += 1
+                continue
+
+            # Check face size
+            size_ok, _ = validator.check_face_size(face_locations[0])
+            if not size_ok:
+                rejected_count += 1
+                continue
+
+            # Crop and resize face
+            top, right, bottom, left = face_locations[0]
+            # Add some padding
+            padding = 30
+            top = max(0, top - padding)
+            left = max(0, left - padding)
+            bottom = min(image.shape[0], bottom + padding)
+            right = min(image.shape[1], right + padding)
+
+            face_img = image[top:bottom, left:right]
+            face_resized = cv2.resize(face_img, (200, 200))
+
+            # Save image
+            img_path = folder / f"{student_id}_{existing_count + saved_count + 1:04d}.jpg"
+            cv2.imwrite(str(img_path), face_resized)
+            saved_count += 1
+            saved_images.append(image)
+
+            progress.progress((i + 1) / len(uploaded_files))
+
+        status.empty()
+        progress.empty()
+
+        # Update student image count
+        total_images = len(list(folder.glob('*.jpg')) + list(folder.glob('*.png')) + list(folder.glob('*.jpeg')))
+        StudentOperations.update_student(student_id, image_count=total_images)
+
+        if saved_count > 0:
+            st.success(f"Saved {saved_count} quality photos! ({rejected_count} rejected for quality issues)")
+
+            if train_after:
+                st.info("Training model with new photos...")
+
+                # Use the enhanced training
+                from utils.face_recognizer import FaceRecognizer
+                recognizer = FaceRecognizer()
+
+                # Prepare training data for all students with enough images
+                students = StudentOperations.get_all_students()
+                training_data = []
+
+                for student in students:
+                    images_path = DATASET_DIR / student.student_id
+                    if images_path.exists():
+                        img_count = len(list(images_path.glob('*.jpg')) + list(images_path.glob('*.png')) + list(images_path.glob('*.jpeg')))
+                        if img_count >= 5:  # Minimum 5 images
+                            training_data.append({
+                                'student_id': student.student_id,
+                                'name': student.name,
+                                'images_path': images_path
+                            })
+
+                if training_data:
+                    success, msg = recognizer.train_model(training_data)
+                    if success:
+                        st.success(f"Model trained successfully! {msg}")
+                        # Update face encoding status
+                        StudentOperations.update_face_encoding(student_id, [1], total_images)  # Placeholder encoding
+                    else:
+                        st.error(f"Training failed: {msg}")
+                else:
+                    st.warning("Not enough images for training. Need at least 5 quality photos per student.")
+        else:
+            st.error(f"No valid face photos found. All {rejected_count} photos were rejected for quality issues (blur, no face detected, or face too small).")
+
+    except Exception as e:
+        st.error(f"Error processing photos: {str(e)}")
+
+
 def show_quick_attendance():
     """Quick attendance marking without login"""
     st.markdown("""
@@ -1887,6 +2096,8 @@ def main():
                 show_admin_capture()
             elif page == 'admin_train':
                 show_admin_train()
+            elif page == 'admin_upload_photos':
+                show_admin_upload_photos()
             elif page == 'admin_mark':
                 show_admin_mark()
             else:

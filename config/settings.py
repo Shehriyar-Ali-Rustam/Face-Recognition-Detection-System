@@ -25,9 +25,11 @@ for directory in [DATASET_DIR, TRAINED_MODELS_DIR, EXPORTS_DIR, LOGS_DIR]:
 # Face recognition settings
 FACE_RECOGNITION_SETTINGS = {
     "model": "hog",  # 'hog' for CPU, 'cnn' for GPU
-    "tolerance": 0.5,  # Lower = more strict matching
-    "num_jitters": 1,  # Number of times to re-sample face
-    "encoding_model": "large",  # 'small' or 'large'
+    "tolerance": 0.4,  # Lower = more strict matching (0.4 is strict, 0.6 is lenient)
+    "num_jitters": 10,  # Number of times to re-sample face (higher = more accurate but slower)
+    "encoding_model": "large",  # 'small' or 'large' - large is more accurate
+    "min_face_size": 80,  # Minimum face size in pixels for quality
+    "min_encodings_per_student": 5,  # Minimum encodings needed for reliable recognition
 }
 
 # Face detection settings
@@ -56,8 +58,8 @@ CAPTURE_SETTINGS = {
 # Attendance settings
 ATTENDANCE_SETTINGS = {
     "duplicate_check_hours": 24,  # Hours before allowing duplicate entry
-    "confidence_threshold": 0.6,  # Minimum confidence for marking attendance
-    "unknown_threshold": 0.4,  # Below this, mark as unknown
+    "confidence_threshold": 0.65,  # Minimum confidence for marking attendance (stricter)
+    "unknown_threshold": 0.5,  # Below this, mark as unknown
 }
 
 # Liveness detection settings
