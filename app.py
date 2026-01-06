@@ -1,6 +1,7 @@
 """
 Face Recognition Attendance System
 Main Application with Separate Student/Admin Portals
+Professional UI with Light/Dark Mode Support
 """
 
 import streamlit as st
@@ -25,484 +26,620 @@ TRAINED_MODELS_DIR = BASE_DIR / "trained_models"
 
 # Page config
 st.set_page_config(
-    page_title="Face Recognition Attendance System",
-    page_icon="",
+    page_title="AttendEase - Smart Attendance",
+    page_icon="📋",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Professional CSS with fixed text visibility
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    * { font-family: 'Inter', sans-serif; }
-
-    .stApp {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    }
-
-    /* Fix all text colors for visibility */
-    .stApp p, .stApp span, .stApp label, .stApp div {
-        color: #ffffff;
-    }
-
-    /* Main content area text */
-    .main .block-container {
-        color: #ffffff;
-    }
-
-    /* Form labels */
-    .stTextInput label, .stSelectbox label, .stSlider label, .stCheckbox label {
-        color: #ffffff !important;
-        font-weight: 500;
-    }
-
-    /* Markdown text */
-    .stMarkdown, .stMarkdown p, .stMarkdown span {
-        color: #ffffff !important;
-    }
-
-    /* Bold text in markdown */
-    .stMarkdown strong {
-        color: #ffffff !important;
-    }
-
-    /* Input fields */
-    .stTextInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #e9ecef;
-        padding: 12px 15px;
-        font-size: 14px;
-        background: white;
-        color: #1a1a2e !important;
-    }
-
-    /* Select box */
-    .stSelectbox > div > div {
-        background: white !important;
-        border-radius: 10px;
-        color: #1a1a2e !important;
-    }
-
-    .stSelectbox > div > div > div {
-        color: #1a1a2e !important;
-    }
-
-    /* Selectbox - selected value text */
-    .stSelectbox [data-baseweb="select"] {
-        background: white !important;
-    }
-
-    .stSelectbox [data-baseweb="select"] * {
-        color: #1a1a2e !important;
-    }
-
-    .stSelectbox [data-baseweb="select"] span {
-        color: #1a1a2e !important;
-    }
-
-    /* Dropdown menu options - FULL FIX */
-    [data-baseweb="popover"] {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="popover"] > div {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="popover"] li {
-        color: #1a1a2e !important;
-        background: white !important;
-    }
-
-    [data-baseweb="popover"] li:hover {
-        background: #e9ecef !important;
-        background-color: #e9ecef !important;
-    }
-
-    /* Select menu list - FULL FIX */
-    [data-baseweb="menu"] {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="menu"] > div {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="menu"] ul {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="menu"] li {
-        background: white !important;
-        background-color: white !important;
-        color: #1a1a2e !important;
-    }
-
-    [data-baseweb="menu"] li:hover {
-        background: #e9ecef !important;
-        background-color: #e9ecef !important;
-    }
-
-    [data-baseweb="menu"] * {
-        color: #1a1a2e !important;
-    }
-
-    /* Listbox dropdown */
-    [data-baseweb="listbox"] {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    [data-baseweb="listbox"] li {
-        background: white !important;
-        color: #1a1a2e !important;
-    }
-
-    [data-baseweb="listbox"] li:hover {
-        background: #e9ecef !important;
-    }
-
-    /* Option in select */
-    [role="option"] {
-        background: white !important;
-        background-color: white !important;
-        color: #1a1a2e !important;
-    }
-
-    [role="option"]:hover {
-        background: #e9ecef !important;
-        background-color: #e9ecef !important;
-    }
-
-    [role="listbox"] {
-        background: white !important;
-        background-color: white !important;
-    }
-
-    /* Selectbox input area */
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div {
-        background: white !important;
-        color: #1a1a2e !important;
-    }
-
-    [data-testid="stSelectbox"] [data-baseweb="select"] > div > div {
-        color: #1a1a2e !important;
-    }
-
-    /* Force all dropdown backgrounds white */
-    div[data-baseweb="popover"] div[data-baseweb="menu"] {
-        background: white !important;
-    }
-
-    div[data-baseweb="select"] + div {
-        background: white !important;
-    }
-
-    /* Slider - force all text white */
-    .stSlider > div > div > div {
-        color: #ffffff !important;
-    }
-
-    .stSlider label {
-        color: #ffffff !important;
-    }
-
-    .stSlider p {
-        color: #ffffff !important;
-    }
-
-    .stSlider [data-testid="stTickBarMin"],
-    .stSlider [data-testid="stTickBarMax"] {
-        color: #ffffff !important;
-    }
-
-    /* Slider value text - the number display */
-    .stSlider [data-testid="stThumbValue"] {
-        color: #1a1a2e !important;
-        background: white !important;
-        padding: 2px 8px !important;
-        border-radius: 5px !important;
-    }
-
-    /* Slider current value display box */
-    .stSlider div[data-baseweb="slider"] + div {
-        color: #ffffff !important;
-    }
-
-    /* All text inside slider container */
-    [data-testid="stSlider"] * {
-        color: #ffffff !important;
-    }
-
-    /* Slider value bubble/tooltip */
-    [data-baseweb="tooltip"] {
-        background: white !important;
-        color: #1a1a2e !important;
-    }
-
-    [data-baseweb="tooltip"] * {
-        color: #1a1a2e !important;
-    }
-
-    /* Slider thumb value display */
-    div[role="slider"] + div {
-        color: #1a1a2e !important;
-        background: white !important;
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
-    }
-
-    /* Slider track */
-    .stSlider [data-baseweb="slider"] {
-        margin-top: 10px;
-    }
-
-    /* Checkbox text */
-    .stCheckbox > label > span {
-        color: #ffffff !important;
-    }
-
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
-    }
-
-    [data-testid="stSidebar"] * {
-        color: #ffffff !important;
-    }
-
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #ffffff !important;
-    }
-
-    /* Role cards */
-    .role-card {
-        background: white;
-        border-radius: 20px;
-        padding: 40px 30px;
-        text-align: center;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 3px solid transparent;
-    }
-
-    .role-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-        border-color: #0f3460;
-    }
-
-    .role-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
-        margin: 0 auto 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 48px;
-        color: white;
-    }
-
-    .role-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1a1a2e !important;
-        margin-bottom: 10px;
-    }
-
-    .role-desc {
-        font-size: 14px;
-        color: #6c757d !important;
-        line-height: 1.5;
-    }
-
-    /* Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
-        border: none;
-        border-radius: 10px;
-        padding: 12px 30px;
-        font-weight: 600;
-        font-size: 15px;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    }
-
-    /* Stat cards */
-    .stat-card {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        margin-bottom: 15px;
-    }
-
-    .stat-value {
-        font-size: 36px;
-        font-weight: 700;
-        color: #1a1a2e !important;
-    }
-
-    .stat-label {
-        font-size: 13px;
-        color: #6c757d !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 5px;
-    }
-
-    /* Header bar */
-    .header-bar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px 30px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-    }
-
-    .header-bar h2, .header-bar p {
-        color: white !important;
-    }
-
-    /* Section title with white background */
-    .section-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #ffffff !important;
-        margin: 25px 0 15px 0;
-        padding: 15px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 10px;
-        border-left: 4px solid #667eea;
-    }
-
-    /* Attendance row */
-    .attendance-row {
-        background: white;
-        border-radius: 10px;
-        padding: 15px 20px;
-        margin: 10px 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .attendance-row strong {
-        color: #1a1a2e !important;
-    }
-
-    .attendance-row span {
-        color: #6c757d !important;
-    }
-
-    /* Status badges */
-    .status-present {
-        background: #d4edda;
-        color: #155724 !important;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-absent {
-        background: #f8d7da;
-        color: #721c24 !important;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    /* Profile card */
-    .profile-card {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        text-align: center;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-
-    .profile-card h3 {
-        color: #1a1a2e !important;
-    }
-
-    .profile-card p {
-        color: #6c757d !important;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin: 0 auto 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 48px;
-        color: white !important;
-    }
-
-    /* Form container with background */
-    .stForm {
-        background: rgba(255,255,255,0.05);
-        padding: 20px;
-        border-radius: 15px;
-    }
-
-    /* Info, warning, error, success messages */
-    .stAlert {
-        border-radius: 10px;
-    }
-
-    /* Horizontal rule */
-    hr {
-        border-color: rgba(255,255,255,0.2);
-    }
-
-    /* Write text (st.write) */
-    .element-container .stMarkdown p {
-        color: #ffffff !important;
-    }
-
-    /* Progress bar */
-    .stProgress > div > div {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    div[data-testid="stSidebarNav"] {display: none;}
-
-    /* Fix write statements inside columns */
-    [data-testid="column"] p {
-        color: #ffffff !important;
-    }
-
-    /* Fix info box text */
-    .stInfo, .stWarning, .stError, .stSuccess {
-        color: inherit !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Theme functions
+def get_theme_css(theme: str) -> str:
+    """Generate CSS based on selected theme"""
+
+    if theme == "dark":
+        return """
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-card: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --text-muted: #64748b;
+                --accent-primary: #3b82f6;
+                --accent-secondary: #8b5cf6;
+                --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+                --border-color: #334155;
+                --success: #22c55e;
+                --warning: #f59e0b;
+                --error: #ef4444;
+                --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            }
+
+            * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+            .stApp {
+                background: var(--bg-primary);
+            }
+
+            /* All text */
+            .stApp, .stApp p, .stApp span, .stApp label, .stApp div,
+            .stMarkdown, .stMarkdown p, .stMarkdown span, .stMarkdown strong,
+            [data-testid="column"] p, .element-container .stMarkdown p {
+                color: var(--text-primary) !important;
+            }
+
+            /* Form labels */
+            .stTextInput label, .stSelectbox label, .stSlider label,
+            .stCheckbox label, .stTextArea label, .stNumberInput label,
+            .stFileUploader label {
+                color: var(--text-primary) !important;
+                font-weight: 500;
+                font-size: 14px;
+            }
+
+            /* Input fields */
+            .stTextInput > div > div > input,
+            .stTextArea textarea,
+            .stNumberInput > div > div > input {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+                color: var(--text-primary) !important;
+                padding: 10px 14px !important;
+            }
+
+            .stTextInput > div > div > input:focus,
+            .stTextArea textarea:focus {
+                border-color: var(--accent-primary) !important;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+            }
+
+            /* Select box */
+            .stSelectbox > div > div,
+            [data-baseweb="select"] {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+            }
+
+            .stSelectbox [data-baseweb="select"] *,
+            .stSelectbox > div > div > div {
+                color: var(--text-primary) !important;
+            }
+
+            /* Dropdown menus */
+            [data-baseweb="popover"], [data-baseweb="menu"],
+            [data-baseweb="listbox"], [role="listbox"] {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+            }
+
+            [data-baseweb="popover"] li, [data-baseweb="menu"] li,
+            [data-baseweb="listbox"] li, [role="option"] {
+                background: var(--bg-secondary) !important;
+                color: var(--text-primary) !important;
+            }
+
+            [data-baseweb="popover"] li:hover, [data-baseweb="menu"] li:hover,
+            [data-baseweb="listbox"] li:hover, [role="option"]:hover {
+                background: var(--bg-primary) !important;
+            }
+
+            /* Slider */
+            .stSlider label, .stSlider p, [data-testid="stSlider"] * {
+                color: var(--text-primary) !important;
+            }
+
+            /* Checkbox */
+            .stCheckbox > label > span {
+                color: var(--text-primary) !important;
+            }
+
+            /* Sidebar */
+            [data-testid="stSidebar"] {
+                background: var(--bg-secondary) !important;
+                border-right: 1px solid var(--border-color);
+            }
+
+            [data-testid="stSidebar"] * {
+                color: var(--text-primary) !important;
+            }
+
+            /* Tabs */
+            .stTabs [data-baseweb="tab-list"] {
+                background: var(--bg-secondary);
+                border-radius: 10px;
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .stTabs [data-baseweb="tab"] {
+                background: transparent;
+                color: var(--text-secondary) !important;
+                border-radius: 8px;
+                padding: 10px 20px;
+            }
+
+            .stTabs [aria-selected="true"] {
+                background: var(--accent-primary) !important;
+                color: white !important;
+            }
+
+            /* Buttons */
+            .stButton > button {
+                background: var(--accent-gradient) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 8px !important;
+                padding: 10px 24px !important;
+                font-weight: 600 !important;
+                font-size: 14px !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .stButton > button:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-lg);
+                opacity: 0.9;
+            }
+
+            /* Cards */
+            .stat-card, .role-card, .profile-card, .attendance-row {
+                background: var(--bg-card) !important;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                box-shadow: var(--shadow);
+            }
+
+            .stat-card { padding: 24px; text-align: center; }
+            .stat-value { font-size: 32px; font-weight: 700; color: var(--text-primary) !important; }
+            .stat-label { font-size: 12px; color: var(--text-muted) !important; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+            .role-card {
+                padding: 32px 24px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .role-card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-lg);
+                border-color: var(--accent-primary);
+            }
+
+            .role-icon {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: var(--accent-gradient);
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 36px;
+                color: white;
+            }
+
+            .role-title { font-size: 20px; font-weight: 600; color: var(--text-primary) !important; margin-bottom: 8px; }
+            .role-desc { font-size: 13px; color: var(--text-secondary) !important; line-height: 1.5; }
+
+            /* Header bar */
+            .header-bar {
+                background: var(--accent-gradient);
+                padding: 20px 24px;
+                border-radius: 12px;
+                margin-bottom: 24px;
+            }
+
+            .header-bar h2, .header-bar p { color: white !important; }
+
+            /* Section title */
+            .section-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--text-primary) !important;
+                margin: 24px 0 16px 0;
+                padding: 12px 16px;
+                background: var(--bg-secondary);
+                border-radius: 8px;
+                border-left: 3px solid var(--accent-primary);
+            }
+
+            /* Attendance row */
+            .attendance-row {
+                padding: 16px 20px;
+                margin: 8px 0;
+            }
+
+            .attendance-row strong { color: var(--text-primary) !important; }
+            .attendance-row span { color: var(--text-secondary) !important; }
+
+            /* Status badges */
+            .status-present {
+                background: rgba(34, 197, 94, 0.15);
+                color: #22c55e !important;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .status-absent {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444 !important;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            /* Profile card */
+            .profile-card { padding: 32px; text-align: center; }
+            .profile-card h3 { color: var(--text-primary) !important; }
+            .profile-card p { color: var(--text-secondary) !important; }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background: var(--accent-gradient);
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 40px;
+                color: white !important;
+            }
+
+            /* Progress bar */
+            .stProgress > div > div {
+                background: var(--accent-gradient) !important;
+            }
+
+            /* File uploader */
+            .stFileUploader > div {
+                background: var(--bg-secondary) !important;
+                border: 1px dashed var(--border-color) !important;
+                border-radius: 8px !important;
+            }
+
+            /* Alerts */
+            .stAlert { border-radius: 8px !important; }
+
+            /* Hide Streamlit branding */
+            #MainMenu, footer, div[data-testid="stSidebarNav"] { display: none !important; }
+
+            /* Theme toggle */
+            .theme-toggle {
+                position: fixed;
+                top: 14px;
+                right: 80px;
+                z-index: 999;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 8px 16px;
+                cursor: pointer;
+                font-size: 13px;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+        </style>
+        """
+    else:  # Light mode
+        return """
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+            :root {
+                --bg-primary: #f8fafc;
+                --bg-secondary: #ffffff;
+                --bg-card: #ffffff;
+                --text-primary: #0f172a;
+                --text-secondary: #475569;
+                --text-muted: #94a3b8;
+                --accent-primary: #3b82f6;
+                --accent-secondary: #8b5cf6;
+                --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+                --border-color: #e2e8f0;
+                --success: #22c55e;
+                --warning: #f59e0b;
+                --error: #ef4444;
+                --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
+            * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+            .stApp {
+                background: var(--bg-primary);
+            }
+
+            /* All text */
+            .stApp, .stApp p, .stApp span, .stApp label, .stApp div,
+            .stMarkdown, .stMarkdown p, .stMarkdown span, .stMarkdown strong,
+            [data-testid="column"] p, .element-container .stMarkdown p {
+                color: var(--text-primary) !important;
+            }
+
+            /* Form labels */
+            .stTextInput label, .stSelectbox label, .stSlider label,
+            .stCheckbox label, .stTextArea label, .stNumberInput label,
+            .stFileUploader label {
+                color: var(--text-primary) !important;
+                font-weight: 500;
+                font-size: 14px;
+            }
+
+            /* Input fields */
+            .stTextInput > div > div > input,
+            .stTextArea textarea,
+            .stNumberInput > div > div > input {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+                color: var(--text-primary) !important;
+                padding: 10px 14px !important;
+            }
+
+            .stTextInput > div > div > input:focus,
+            .stTextArea textarea:focus {
+                border-color: var(--accent-primary) !important;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+            }
+
+            /* Select box */
+            .stSelectbox > div > div,
+            [data-baseweb="select"] {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+            }
+
+            .stSelectbox [data-baseweb="select"] *,
+            .stSelectbox > div > div > div {
+                color: var(--text-primary) !important;
+            }
+
+            /* Dropdown menus */
+            [data-baseweb="popover"], [data-baseweb="menu"],
+            [data-baseweb="listbox"], [role="listbox"] {
+                background: var(--bg-secondary) !important;
+                border: 1px solid var(--border-color) !important;
+                border-radius: 8px !important;
+                box-shadow: var(--shadow-lg) !important;
+            }
+
+            [data-baseweb="popover"] li, [data-baseweb="menu"] li,
+            [data-baseweb="listbox"] li, [role="option"] {
+                background: var(--bg-secondary) !important;
+                color: var(--text-primary) !important;
+            }
+
+            [data-baseweb="popover"] li:hover, [data-baseweb="menu"] li:hover,
+            [data-baseweb="listbox"] li:hover, [role="option"]:hover {
+                background: var(--bg-primary) !important;
+            }
+
+            /* Slider */
+            .stSlider label, .stSlider p, [data-testid="stSlider"] * {
+                color: var(--text-primary) !important;
+            }
+
+            /* Checkbox */
+            .stCheckbox > label > span {
+                color: var(--text-primary) !important;
+            }
+
+            /* Sidebar */
+            [data-testid="stSidebar"] {
+                background: var(--bg-secondary) !important;
+                border-right: 1px solid var(--border-color);
+            }
+
+            [data-testid="stSidebar"] * {
+                color: var(--text-primary) !important;
+            }
+
+            /* Tabs */
+            .stTabs [data-baseweb="tab-list"] {
+                background: var(--bg-primary);
+                border-radius: 10px;
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .stTabs [data-baseweb="tab"] {
+                background: transparent;
+                color: var(--text-secondary) !important;
+                border-radius: 8px;
+                padding: 10px 20px;
+            }
+
+            .stTabs [aria-selected="true"] {
+                background: var(--accent-primary) !important;
+                color: white !important;
+            }
+
+            /* Buttons */
+            .stButton > button {
+                background: var(--accent-gradient) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 8px !important;
+                padding: 10px 24px !important;
+                font-weight: 600 !important;
+                font-size: 14px !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .stButton > button:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-lg);
+                opacity: 0.9;
+            }
+
+            /* Cards */
+            .stat-card, .role-card, .profile-card, .attendance-row {
+                background: var(--bg-card) !important;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                box-shadow: var(--shadow);
+            }
+
+            .stat-card { padding: 24px; text-align: center; }
+            .stat-value { font-size: 32px; font-weight: 700; color: var(--text-primary) !important; }
+            .stat-label { font-size: 12px; color: var(--text-muted) !important; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+            .role-card {
+                padding: 32px 24px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .role-card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-lg);
+                border-color: var(--accent-primary);
+            }
+
+            .role-icon {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: var(--accent-gradient);
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 36px;
+                color: white;
+            }
+
+            .role-title { font-size: 20px; font-weight: 600; color: var(--text-primary) !important; margin-bottom: 8px; }
+            .role-desc { font-size: 13px; color: var(--text-secondary) !important; line-height: 1.5; }
+
+            /* Header bar */
+            .header-bar {
+                background: var(--accent-gradient);
+                padding: 20px 24px;
+                border-radius: 12px;
+                margin-bottom: 24px;
+            }
+
+            .header-bar h2, .header-bar p { color: white !important; }
+
+            /* Section title */
+            .section-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--text-primary) !important;
+                margin: 24px 0 16px 0;
+                padding: 12px 16px;
+                background: var(--bg-secondary);
+                border-radius: 8px;
+                border-left: 3px solid var(--accent-primary);
+            }
+
+            /* Attendance row */
+            .attendance-row {
+                padding: 16px 20px;
+                margin: 8px 0;
+            }
+
+            .attendance-row strong { color: var(--text-primary) !important; }
+            .attendance-row span { color: var(--text-secondary) !important; }
+
+            /* Status badges */
+            .status-present {
+                background: rgba(34, 197, 94, 0.1);
+                color: #16a34a !important;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .status-absent {
+                background: rgba(239, 68, 68, 0.1);
+                color: #dc2626 !important;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            /* Profile card */
+            .profile-card { padding: 32px; text-align: center; }
+            .profile-card h3 { color: var(--text-primary) !important; }
+            .profile-card p { color: var(--text-secondary) !important; }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background: var(--accent-gradient);
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 40px;
+                color: white !important;
+            }
+
+            /* Progress bar */
+            .stProgress > div > div {
+                background: var(--accent-gradient) !important;
+            }
+
+            /* File uploader */
+            .stFileUploader > div {
+                background: var(--bg-secondary) !important;
+                border: 1px dashed var(--border-color) !important;
+                border-radius: 8px !important;
+            }
+
+            /* Alerts */
+            .stAlert { border-radius: 8px !important; }
+
+            /* Hide Streamlit branding */
+            #MainMenu, footer, div[data-testid="stSidebarNav"] { display: none !important; }
+
+            /* Theme toggle */
+            .theme-toggle {
+                position: fixed;
+                top: 14px;
+                right: 80px;
+                z-index: 999;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 8px 16px;
+                cursor: pointer;
+                font-size: 13px;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+        </style>
+        """
+
+# Initialize theme in session state
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'light'
+
+# Apply theme CSS
+st.markdown(get_theme_css(st.session_state.theme), unsafe_allow_html=True)
 
 
 def init_session_state():
@@ -513,23 +650,45 @@ def init_session_state():
         'student_id': None,
         'username': None,
         'page': 'role_select',
-        'selected_role': None
+        'selected_role': None,
+        'theme': 'light'
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
 
 
+def toggle_theme():
+    """Toggle between light and dark theme"""
+    st.session_state.theme = 'dark' if st.session_state.theme == 'light' else 'light'
+
+
+def show_theme_toggle():
+    """Display theme toggle button"""
+    col1, col2, col3 = st.columns([6, 1, 1])
+    with col3:
+        theme_icon = "🌙" if st.session_state.theme == 'light' else "☀️"
+        theme_text = "Dark" if st.session_state.theme == 'light' else "Light"
+        if st.button(f"{theme_icon} {theme_text}", key="theme_toggle", help="Toggle theme"):
+            toggle_theme()
+            st.rerun()
+
+
 def show_role_selection():
     """Show role selection page - Student or Admin"""
+    # Theme toggle at top
+    show_theme_toggle()
+
     st.markdown("""
     <div style="text-align:center;padding:40px 0;">
-        <h1 style="color:white;font-size:36px;margin-bottom:10px;">Face Recognition</h1>
-        <p style="color:rgba(255,255,255,0.7);font-size:16px;">Attendance Management System</p>
+        <h1 style="font-size:42px;margin-bottom:8px;font-weight:700;">
+            <span style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AttendEase</span>
+        </h1>
+        <p style="font-size:16px;opacity:0.7;">Smart Face Recognition Attendance System</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h3 style='color:white;text-align:center;margin-bottom:30px;'>Select Your Portal</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align:center;margin-bottom:30px;font-weight:500;'>Select Your Portal</h3>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
 
@@ -539,12 +698,12 @@ def show_role_selection():
         with col_a:
             st.markdown("""
             <div class="role-card">
-                <div class="role-icon">S</div>
+                <div class="role-icon">👨‍🎓</div>
                 <div class="role-title">Student</div>
-                <div class="role-desc">Mark attendance, view your records, and manage profile</div>
+                <div class="role-desc">Mark attendance, view records, and manage your profile</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Enter as Student", key="student_btn", use_container_width=True):
+            if st.button("Student Portal", key="student_btn", use_container_width=True):
                 st.session_state.selected_role = 'student'
                 st.session_state.page = 'student_login'
                 st.rerun()
@@ -552,25 +711,25 @@ def show_role_selection():
         with col_b:
             st.markdown("""
             <div class="role-card">
-                <div class="role-icon">A</div>
+                <div class="role-icon">👨‍💼</div>
                 <div class="role-title">Admin</div>
                 <div class="role-desc">Manage students, train model, and view reports</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Enter as Admin", key="admin_btn", use_container_width=True):
+            if st.button("Admin Portal", key="admin_btn", use_container_width=True):
                 st.session_state.selected_role = 'admin'
                 st.session_state.page = 'admin_login'
                 st.rerun()
 
-    # Quick Attendance Section - Same row as portals for consistency
+    # Quick Attendance Section
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<p style='color:rgba(255,255,255,0.6);text-align:center;font-size:14px;margin-bottom:15px;'>— OR —</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;font-size:14px;margin-bottom:15px;opacity:0.6;'>— OR —</p>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("""
         <div class="role-card">
-            <div class="role-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">F</div>
+            <div class="role-icon" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">📸</div>
             <div class="role-title">Quick Attendance</div>
             <div class="role-desc">Scan your face to mark attendance instantly without logging in</div>
         </div>
@@ -582,49 +741,53 @@ def show_role_selection():
 
 def show_student_login():
     """Show student login page"""
+    show_theme_toggle()
+
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
         st.markdown("""
         <div style="text-align:center;padding:30px 0;">
-            <h1 style="color:white;font-size:32px;margin-bottom:10px;">Student Portal</h1>
-            <p style="color:rgba(255,255,255,0.7);">Login to access your dashboard</p>
+            <div style="font-size:48px;margin-bottom:16px;">👨‍🎓</div>
+            <h1 style="font-size:28px;margin-bottom:8px;font-weight:600;">Student Portal</h1>
+            <p style="font-size:14px;opacity:0.7;">Login to access your dashboard</p>
         </div>
         """, unsafe_allow_html=True)
 
-        with st.container():
-            st.markdown("### Login")
-            username = st.text_input("Username", placeholder="Enter your username", key="student_username")
-            password = st.text_input("Password", type="password", placeholder="Enter your password", key="student_password")
+        st.markdown('<div class="stat-card" style="padding:32px;">', unsafe_allow_html=True)
+        username = st.text_input("Username", placeholder="Enter your username", key="student_username")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="student_password")
 
-            if st.button("Login", use_container_width=True, key="student_login_btn"):
-                if username and password:
-                    success, role, student_id = UserOperations.authenticate(username, password)
-                    if success and role == 'student':
-                        st.session_state.logged_in = True
-                        st.session_state.user_role = role
-                        st.session_state.student_id = student_id
-                        st.session_state.username = username
-                        st.session_state.page = 'student_dashboard'
-                        st.rerun()
-                    elif success and role == 'admin':
-                        st.error("This is an admin account. Please use Admin Portal.")
-                    else:
-                        st.error("Invalid username or password")
+        if st.button("Login", use_container_width=True, key="student_login_btn"):
+            if username and password:
+                success, role, student_id = UserOperations.authenticate(username, password)
+                if success and role == 'student':
+                    st.session_state.logged_in = True
+                    st.session_state.user_role = role
+                    st.session_state.student_id = student_id
+                    st.session_state.username = username
+                    st.session_state.page = 'student_dashboard'
+                    st.rerun()
+                elif success and role == 'admin':
+                    st.error("This is an admin account. Please use Admin Portal.")
                 else:
-                    st.warning("Please enter username and password")
+                    st.error("Invalid username or password")
+            else:
+                st.warning("Please enter username and password")
 
-            st.markdown("---")
+        st.markdown("---")
 
-            if st.button("Create New Account", use_container_width=True, key="student_register_btn"):
-                st.session_state.page = 'student_register'
-                st.rerun()
+        if st.button("Create New Account", use_container_width=True, key="student_register_btn"):
+            st.session_state.page = 'student_register'
+            st.rerun()
 
-            st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            if st.button("Back to Portal Selection", use_container_width=True, key="student_back_btn"):
-                st.session_state.page = 'role_select'
-                st.rerun()
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("← Back to Home", use_container_width=True, key="student_back_btn"):
+            st.session_state.page = 'role_select'
+            st.rerun()
 
 
 def show_student_register():
@@ -701,52 +864,54 @@ def show_student_register():
 
 def show_admin_login():
     """Show admin login page"""
+    show_theme_toggle()
+
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
         st.markdown("""
         <div style="text-align:center;padding:30px 0;">
-            <h1 style="color:white;font-size:32px;margin-bottom:10px;">Admin Portal</h1>
-            <p style="color:rgba(255,255,255,0.7);">Login to manage system</p>
+            <div style="font-size:48px;margin-bottom:16px;">👨‍💼</div>
+            <h1 style="font-size:28px;margin-bottom:8px;font-weight:600;">Admin Portal</h1>
+            <p style="font-size:14px;opacity:0.7;">Login to manage the system</p>
         </div>
         """, unsafe_allow_html=True)
 
-        with st.container():
-            st.markdown("### Admin Login")
-            username = st.text_input("Username", placeholder="Enter admin username", key="admin_username")
-            password = st.text_input("Password", type="password", placeholder="Enter admin password", key="admin_password")
+        st.markdown('<div class="stat-card" style="padding:32px;">', unsafe_allow_html=True)
+        username = st.text_input("Username", placeholder="Enter admin username", key="admin_username")
+        password = st.text_input("Password", type="password", placeholder="Enter admin password", key="admin_password")
 
-            if st.button("Login", use_container_width=True, key="admin_login_btn"):
-                if username and password:
-                    success, role, student_id = UserOperations.authenticate(username, password)
-                    if success and role == 'admin':
-                        st.session_state.logged_in = True
-                        st.session_state.user_role = role
-                        st.session_state.student_id = student_id
-                        st.session_state.username = username
-                        st.session_state.page = 'admin_dashboard'
-                        st.rerun()
-                    elif success and role == 'student':
-                        st.error("This is a student account. Please use Student Portal.")
-                    else:
-                        st.error("Invalid username or password")
+        if st.button("Login", use_container_width=True, key="admin_login_btn"):
+            if username and password:
+                success, role, student_id = UserOperations.authenticate(username, password)
+                if success and role == 'admin':
+                    st.session_state.logged_in = True
+                    st.session_state.user_role = role
+                    st.session_state.student_id = student_id
+                    st.session_state.username = username
+                    st.session_state.page = 'admin_dashboard'
+                    st.rerun()
+                elif success and role == 'student':
+                    st.error("This is a student account. Please use Student Portal.")
                 else:
-                    st.warning("Please enter username and password")
+                    st.error("Invalid username or password")
+            else:
+                st.warning("Please enter username and password")
 
-            st.markdown("---")
-            st.markdown("**Default Admin:** admin / admin123")
+        st.markdown("---")
+        st.info("**Default:** admin / admin123")
 
-            st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("Register New Admin", use_container_width=True, key="admin_register_nav_btn"):
+            st.session_state.page = 'admin_register_self'
+            st.rerun()
 
-            if st.button("Register New Admin", use_container_width=True, key="admin_register_nav_btn"):
-                st.session_state.page = 'admin_register_self'
-                st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
-            if st.button("Back to Portal Selection", use_container_width=True, key="admin_back_btn"):
-                st.session_state.page = 'role_select'
-                st.rerun()
+        if st.button("← Back to Home", use_container_width=True, key="admin_back_btn"):
+            st.session_state.page = 'role_select'
+            st.rerun()
 
 
 def show_admin_register_self():
