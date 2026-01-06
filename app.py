@@ -1196,14 +1196,11 @@ def show_admin_dashboard():
         if st.button("Register Student", use_container_width=True):
             st.session_state.page = 'admin_register'
             st.rerun()
-        if st.button("Capture Faces", use_container_width=True):
+        if st.button("Add Face Images", use_container_width=True):
             st.session_state.page = 'admin_capture'
             st.rerun()
         if st.button("Train Model", use_container_width=True):
             st.session_state.page = 'admin_train'
-            st.rerun()
-        if st.button("Upload Photos", use_container_width=True):
-            st.session_state.page = 'admin_upload_photos'
             st.rerun()
         if st.button("Mark Attendance", use_container_width=True):
             st.session_state.page = 'admin_mark'
@@ -1418,13 +1415,13 @@ def show_admin_edit_student():
 
 
 def show_admin_capture():
-    """Capture faces"""
+    """Capture faces and upload photos - combined page"""
     with st.sidebar:
         if st.button("Back", use_container_width=True):
             st.session_state.page = 'admin_dashboard'
             st.rerun()
 
-    st.markdown('<div class="header-bar"><h2 style="margin:0;">Capture Faces</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="header-bar"><h2 style="margin:0;">Add Face Images</h2></div>', unsafe_allow_html=True)
 
     students = StudentOperations.get_all_students()
 
@@ -1438,14 +1435,68 @@ def show_admin_capture():
                                format_func=lambda x: student_options[x])
 
     if selected_id:
+        student = StudentOperations.get_student(selected_id)
         folder = DATASET_DIR / selected_id
-        existing = len(list(folder.glob('*.jpg'))) if folder.exists() else 0
-        st.info(f"Current images: {existing}")
+        existing = len(list(folder.glob('*.jpg')) + list(folder.glob('*.png')) + list(folder.glob('*.jpeg'))) if folder.exists() else 0
 
-        num_images = st.slider("Images to capture", 10, 100, 50)
+        # Student info card
+        st.markdown(f"""
+        <div class="stat-card" style="text-align:left;margin:15px 0;">
+            <strong style="color:#1a1a2e;">{student.name}</strong><br>
+            <span style="color:#6c757d;font-size:14px;">Current images: {existing} | Min required: 5</span>
+        </div>
+        """, unsafe_allow_html=True)
 
-        if st.button("Start Capture", type="primary"):
-            capture_faces(selected_id, num_images)
+        # Tabs for different methods
+        tab1, tab2 = st.tabs(["📷 Camera Capture", "📁 Upload Photos"])
+
+        with tab1:
+            st.markdown("**Capture faces using camera**")
+            st.markdown("<span style='color:#666;font-size:13px;'>Move your head slowly while capturing for better accuracy</span>", unsafe_allow_html=True)
+
+            num_images = st.slider("Images to capture", 10, 100, 50)
+
+            if st.button("Start Camera Capture", type="primary", use_container_width=True):
+                capture_faces(selected_id, num_images)
+
+        with tab2:
+            st.markdown("**Upload face photos**")
+            st.markdown("""
+            <span style="color:#666;font-size:13px;">
+            Tips for best results:<br>
+            • Upload 10-20 clear face photos from different angles<br>
+            • Good lighting, no heavy shadows<br>
+            • Face should be clearly visible and centered<br>
+            • Avoid blurry or dark photos
+            </span>
+            """, unsafe_allow_html=True)
+
+            uploaded_files = st.file_uploader(
+                "Choose photos (JPG, PNG)",
+                type=['jpg', 'jpeg', 'png'],
+                accept_multiple_files=True,
+                key="photo_uploader_combined"
+            )
+
+            if uploaded_files:
+                st.markdown(f"**{len(uploaded_files)} photos selected**")
+
+                # Preview uploaded images
+                cols = st.columns(5)
+                for i, file in enumerate(uploaded_files[:10]):
+                    with cols[i % 5]:
+                        st.image(file, use_container_width=True)
+
+                if len(uploaded_files) > 10:
+                    st.caption(f"...and {len(uploaded_files) - 10} more")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Save Photos Only", use_container_width=True):
+                        process_uploaded_photos(selected_id, student.name, uploaded_files, train_after=False)
+                with col2:
+                    if st.button("Save & Train Model", type="primary", use_container_width=True):
+                        process_uploaded_photos(selected_id, student.name, uploaded_files, train_after=True)
 
 
 def capture_faces(student_id: str, num_images: int):
@@ -1582,81 +1633,6 @@ def train_model():
         st.error("face_recognition not installed")
     except Exception as e:
         st.error(f"Error: {str(e)}")
-
-
-def show_admin_upload_photos():
-    """Upload photos for face training - more accurate than camera capture"""
-    with st.sidebar:
-        if st.button("Back", use_container_width=True):
-            st.session_state.page = 'admin_dashboard'
-            st.rerun()
-
-    st.markdown('<div class="header-bar"><h2 style="margin:0;">Upload Photos for Training</h2></div>', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="stat-card" style="text-align:left;margin-bottom:20px;background:#e8f5e9;">
-        <strong style="color:#2e7d32;">High Accuracy Training</strong><br>
-        <span style="color:#555;font-size:14px;">Upload clear face photos for better recognition accuracy.
-        Photos are validated for quality (blur, brightness, face size) before training.</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    students = StudentOperations.get_all_students()
-
-    if not students:
-        st.warning("No students registered. Please register students first.")
-        return
-
-    student_options = {s.student_id: f"{s.name} ({s.student_id})" for s in students}
-    selected_id = st.selectbox("Select Student", list(student_options.keys()),
-                               format_func=lambda x: student_options[x])
-
-    if selected_id:
-        student = StudentOperations.get_student(selected_id)
-        folder = DATASET_DIR / selected_id
-        existing = len(list(folder.glob('*.jpg')) + list(folder.glob('*.png')) + list(folder.glob('*.jpeg'))) if folder.exists() else 0
-
-        st.info(f"Current images for {student.name}: {existing}")
-
-        st.markdown("---")
-        st.markdown("**Upload Face Photos**")
-        st.markdown("""
-        <span style="color:#666;font-size:13px;">
-        Tips for best results:
-        • Upload 10-20 clear face photos from different angles
-        • Good lighting, no heavy shadows
-        • Face should be clearly visible and centered
-        • Avoid blurry or dark photos
-        </span>
-        """, unsafe_allow_html=True)
-
-        uploaded_files = st.file_uploader(
-            "Choose photos (JPG, PNG)",
-            type=['jpg', 'jpeg', 'png'],
-            accept_multiple_files=True,
-            key="photo_uploader"
-        )
-
-        if uploaded_files:
-            st.markdown(f"**{len(uploaded_files)} photos selected**")
-
-            # Preview uploaded images
-            cols = st.columns(5)
-            for i, file in enumerate(uploaded_files[:10]):  # Show first 10 previews
-                with cols[i % 5]:
-                    st.image(file, use_container_width=True)
-
-            if len(uploaded_files) > 10:
-                st.caption(f"...and {len(uploaded_files) - 10} more")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                save_only = st.button("Save Photos Only", use_container_width=True)
-            with col2:
-                save_and_train = st.button("Save & Train Model", type="primary", use_container_width=True)
-
-            if save_only or save_and_train:
-                process_uploaded_photos(selected_id, student.name, uploaded_files, train_after=save_and_train)
 
 
 def process_uploaded_photos(student_id: str, student_name: str, uploaded_files, train_after: bool = False):
@@ -2096,8 +2072,6 @@ def main():
                 show_admin_capture()
             elif page == 'admin_train':
                 show_admin_train()
-            elif page == 'admin_upload_photos':
-                show_admin_upload_photos()
             elif page == 'admin_mark':
                 show_admin_mark()
             else:
