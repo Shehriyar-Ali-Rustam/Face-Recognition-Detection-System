@@ -577,6 +577,32 @@ THEME_CSS = """
         border-color: #d4d4d4;
     }
 
+    /* Forgot password link style - looks like plain text */
+    .forgot-pw-link button {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #f97316 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        text-decoration: none !important;
+    }
+
+    .forgot-pw-link button:hover {
+        background: transparent !important;
+        color: #ea580c !important;
+        text-decoration: underline !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .forgot-pw-link {
+        text-align: right;
+        margin: -8px 0 16px 0;
+    }
+
     .divider {
         display: flex;
         align-items: center;
@@ -801,13 +827,13 @@ def show_student_login():
         username = st.text_input("Email or Username", placeholder="Enter your email or username", key="student_username")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="student_password")
 
-        # Forgot Password Link
-        col_fp1, col_fp2 = st.columns([1, 1])
-        with col_fp2:
-            if st.button("Forgot Password?", key="student_forgot_pw", type="secondary"):
-                st.session_state.forgot_password_role = 'student'
-                st.session_state.page = 'forgot_password'
-                st.rerun()
+        # Forgot Password Link (plain text style)
+        st.markdown('<div class="forgot-pw-link">', unsafe_allow_html=True)
+        if st.button("Forgot Password?", key="student_forgot_pw"):
+            st.session_state.forgot_password_role = 'student'
+            st.session_state.page = 'forgot_password'
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if st.button("Sign In", use_container_width=True, key="student_login_btn", type="primary"):
             if username and password:
@@ -950,13 +976,13 @@ def show_admin_login():
         username = st.text_input("Email or Username", placeholder="Enter your email or username", key="admin_username")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="admin_password")
 
-        # Forgot Password Link
-        col_fp1, col_fp2 = st.columns([1, 1])
-        with col_fp2:
-            if st.button("Forgot Password?", key="admin_forgot_pw", type="secondary"):
-                st.session_state.forgot_password_role = 'admin'
-                st.session_state.page = 'forgot_password'
-                st.rerun()
+        # Forgot Password Link (plain text style)
+        st.markdown('<div class="forgot-pw-link">', unsafe_allow_html=True)
+        if st.button("Forgot Password?", key="admin_forgot_pw"):
+            st.session_state.forgot_password_role = 'admin'
+            st.session_state.page = 'forgot_password'
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if st.button("Sign In", use_container_width=True, key="admin_login_btn", type="primary"):
             if username and password:
