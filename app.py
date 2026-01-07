@@ -619,8 +619,36 @@ THEME_CSS = """
         margin-bottom: 20px;
     }
 
-    /* Hide Streamlit branding */
+    /* Hide Streamlit branding and fix header */
     #MainMenu, footer, div[data-testid="stSidebarNav"] { display: none !important; }
+
+    /* Fix top header/toolbar bar */
+    header[data-testid="stHeader"] {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    /* Streamlit toolbar buttons */
+    header[data-testid="stHeader"] button,
+    header[data-testid="stHeader"] [data-testid="stToolbar"] {
+        background: transparent !important;
+        color: #525252 !important;
+    }
+
+    /* Decoration bar at top */
+    .stDeployButton, [data-testid="stDecoration"] {
+        background: #ffffff !important;
+    }
+
+    /* Top bar container */
+    [data-testid="stToolbar"] {
+        background: #ffffff !important;
+    }
+
+    /* Status widget */
+    [data-testid="stStatusWidget"] {
+        background: #ffffff !important;
+    }
 
     /* Custom scrollbar */
     ::-webkit-scrollbar {
