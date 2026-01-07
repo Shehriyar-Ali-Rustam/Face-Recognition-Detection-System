@@ -23,7 +23,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS - Professional Indigo Theme
+# Custom CSS - Orange, White & Black Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -32,21 +32,21 @@ st.markdown("""
     .main-header {
         font-size: 2rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #171717;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 3px solid #4f46e5;
+        border-bottom: 3px solid #f97316;
     }
     .sub-header {
         font-size: 1.2rem;
         font-weight: 500;
-        color: #1e293b;
+        color: #171717;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
     }
     .stat-card {
         background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e5e5;
         border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
@@ -56,28 +56,28 @@ st.markdown("""
     .stat-number {
         font-size: 2rem;
         font-weight: 700;
-        color: #4f46e5;
+        color: #f97316;
     }
     .stat-label {
         font-size: 0.85rem;
-        color: #64748b;
+        color: #525252;
         margin-top: 0.5rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     .training-log {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: #fafafa;
+        border: 1px solid #e5e5e5;
         border-radius: 10px;
         padding: 1rem;
         font-family: 'SF Mono', Monaco, monospace;
         font-size: 13px;
         max-height: 300px;
         overflow-y: auto;
-        color: #1e293b;
+        color: #171717;
     }
     .stButton>button {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        background: #f97316;
         color: white;
         border: none;
         border-radius: 8px;
@@ -85,7 +85,7 @@ st.markdown("""
         font-weight: 600;
     }
     .stButton>button:hover {
-        filter: brightness(1.1);
+        background: #ea580c;
         transform: translateY(-1px);
     }
 </style>

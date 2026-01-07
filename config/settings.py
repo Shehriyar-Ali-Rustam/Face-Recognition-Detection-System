@@ -70,19 +70,19 @@ LIVENESS_SETTINGS = {
     "required_blinks": 2,
 }
 
-# UI Theme colors (Professional Indigo)
+# UI Theme colors (Orange, White & Black)
 THEME = {
-    "primary": "#4f46e5",
-    "primary_dark": "#4338ca",
-    "primary_light": "#6366f1",
-    "secondary": "#1e1b4b",
-    "accent": "#7c3aed",
-    "text_primary": "#1e293b",
-    "text_secondary": "#64748b",
-    "success": "#10b981",
-    "warning": "#f59e0b",
+    "primary": "#f97316",
+    "primary_dark": "#ea580c",
+    "primary_light": "#fb923c",
+    "secondary": "#171717",
+    "accent": "#f97316",
+    "text_primary": "#171717",
+    "text_secondary": "#525252",
+    "success": "#22c55e",
+    "warning": "#f97316",
     "error": "#ef4444",
-    "background": "#f8fafc",
+    "background": "#ffffff",
     "card": "#ffffff",
 }
 

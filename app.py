@@ -1,7 +1,7 @@
 """
 Face Recognition Attendance System
 Main Application with Separate Student/Admin Portals
-Professional Indigo Theme UI
+Professional Orange, White & Black Theme UI
 """
 
 import streamlit as st
@@ -32,54 +32,50 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional Indigo Theme CSS - Modern & Trustworthy
+# Professional Orange, White & Black Theme CSS
 THEME_CSS = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
     :root {
-        /* Primary Colors - Deep Indigo/Blue */
-        --primary: #4f46e5;
-        --primary-dark: #4338ca;
-        --primary-light: #6366f1;
-        --primary-50: #eef2ff;
-        --primary-100: #e0e7ff;
+        /* Primary Colors - Orange */
+        --primary: #f97316;
+        --primary-dark: #ea580c;
+        --primary-light: #fb923c;
+        --primary-50: #fff7ed;
+        --primary-100: #ffedd5;
 
-        /* Background Colors */
-        --bg-primary: #f8fafc;
-        --bg-secondary: #ffffff;
+        /* Background Colors - White */
+        --bg-primary: #ffffff;
+        --bg-secondary: #fafafa;
         --bg-card: #ffffff;
-        --bg-sidebar: #1e1b4b;
+        --bg-sidebar: #171717;
 
-        /* Text Colors */
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --text-muted: #94a3b8;
-        --text-light: #f1f5f9;
+        /* Text Colors - Black */
+        --text-primary: #171717;
+        --text-secondary: #525252;
+        --text-muted: #a3a3a3;
+        --text-light: #fafafa;
 
         /* Accent & Status Colors */
-        --accent: #4f46e5;
-        --accent-hover: #4338ca;
-        --success: #10b981;
-        --success-bg: rgba(16, 185, 129, 0.1);
-        --warning: #f59e0b;
-        --warning-bg: rgba(245, 158, 11, 0.1);
+        --accent: #f97316;
+        --accent-hover: #ea580c;
+        --success: #22c55e;
+        --success-bg: rgba(34, 197, 94, 0.1);
+        --warning: #f97316;
+        --warning-bg: rgba(249, 115, 22, 0.1);
         --error: #ef4444;
         --error-bg: rgba(239, 68, 68, 0.1);
 
         /* Borders & Shadows */
-        --border-color: #e2e8f0;
-        --border-light: #f1f5f9;
-        --hover-bg: #f1f5f9;
+        --border-color: #e5e5e5;
+        --border-light: #f5f5f5;
+        --hover-bg: #f5f5f5;
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-
-        /* Gradients */
-        --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        --gradient-dark: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
     }
 
     * {
@@ -104,9 +100,9 @@ THEME_CSS = """
     .stFileUploader label {
         color: var(--text-secondary) !important;
         font-weight: 500;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 13px;
+        text-transform: none;
+        letter-spacing: 0;
     }
 
     /* Input fields */
@@ -148,7 +144,7 @@ THEME_CSS = """
     /* Dropdown menus */
     [data-baseweb="popover"], [data-baseweb="menu"],
     [data-baseweb="listbox"], [role="listbox"] {
-        background: var(--bg-secondary) !important;
+        background: var(--bg-card) !important;
         border: 1px solid var(--border-color) !important;
         border-radius: 10px !important;
         box-shadow: var(--shadow-xl) !important;
@@ -157,7 +153,7 @@ THEME_CSS = """
 
     [data-baseweb="popover"] li, [data-baseweb="menu"] li,
     [data-baseweb="listbox"] li, [role="option"] {
-        background: var(--bg-secondary) !important;
+        background: var(--bg-card) !important;
         color: var(--text-primary) !important;
         padding: 10px 16px !important;
     }
@@ -181,10 +177,10 @@ THEME_CSS = """
         color: var(--text-primary) !important;
     }
 
-    /* Sidebar - Dark Indigo Theme */
+    /* Sidebar - Black Theme with visible text */
     [data-testid="stSidebar"] {
-        background: var(--gradient-dark) !important;
-        border-right: none;
+        background: var(--bg-sidebar) !important;
+        border-right: 1px solid #262626;
     }
 
     [data-testid="stSidebar"] > div:first-child {
@@ -193,33 +189,39 @@ THEME_CSS = """
     }
 
     [data-testid="stSidebar"] * {
-        color: var(--text-light) !important;
+        color: #fafafa !important;
     }
 
     [data-testid="stSidebar"] .stMarkdown h3 {
         color: #ffffff !important;
         font-weight: 600;
+        font-size: 16px;
+    }
+
+    [data-testid="stSidebar"] .stMarkdown p {
+        color: #a3a3a3 !important;
     }
 
     [data-testid="stSidebar"] hr {
-        border-color: rgba(255,255,255,0.1) !important;
+        border-color: #404040 !important;
     }
 
     [data-testid="stSidebar"] .stButton > button {
         background: transparent !important;
         border: none !important;
         border-radius: 8px !important;
-        color: rgba(255,255,255,0.7) !important;
+        color: #d4d4d4 !important;
         padding: 12px 16px !important;
         text-align: left !important;
-        font-weight: 400 !important;
+        font-weight: 500 !important;
         font-size: 14px !important;
         transition: all 0.2s ease !important;
-        margin: 2px 8px !important;
+        margin: 4px 8px !important;
+        width: calc(100% - 16px) !important;
     }
 
     [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(255,255,255,0.1) !important;
+        background: #f97316 !important;
         color: #ffffff !important;
     }
 
@@ -247,7 +249,7 @@ THEME_CSS = """
 
     /* Main Buttons */
     .stButton > button {
-        background: var(--gradient-primary) !important;
+        background: var(--primary) !important;
         color: #ffffff !important;
         border: none !important;
         border-radius: 8px !important;
@@ -260,8 +262,7 @@ THEME_CSS = """
     }
 
     .stButton > button:hover {
-        background: var(--gradient-primary) !important;
-        filter: brightness(1.1);
+        background: var(--primary-dark) !important;
         transform: translateY(-1px);
         box-shadow: var(--shadow-md) !important;
     }
@@ -314,14 +315,14 @@ THEME_CSS = """
     .role-card:hover {
         transform: translateY(-6px);
         box-shadow: var(--shadow-xl);
-        border-color: var(--primary-light);
+        border-color: var(--primary);
     }
 
     .role-icon {
         width: 72px;
         height: 72px;
         border-radius: 16px;
-        background: var(--gradient-primary);
+        background: var(--primary);
         margin: 0 auto 20px;
         display: flex;
         align-items: center;
@@ -348,7 +349,7 @@ THEME_CSS = """
 
     /* Header bar */
     .header-bar {
-        background: var(--gradient-primary);
+        background: var(--bg-sidebar);
         padding: 24px 28px;
         border-radius: 12px;
         margin-bottom: 24px;
@@ -362,7 +363,7 @@ THEME_CSS = """
     }
 
     .header-bar p {
-        color: rgba(255,255,255,0.85) !important;
+        color: rgba(255,255,255,0.7) !important;
         margin: 6px 0 0 0;
     }
 
@@ -433,7 +434,7 @@ THEME_CSS = """
         width: 100px;
         height: 100px;
         border-radius: 20px;
-        background: var(--gradient-primary);
+        background: var(--primary);
         margin: 0 auto 20px;
         display: flex;
         align-items: center;
@@ -446,7 +447,7 @@ THEME_CSS = """
 
     /* Progress bar */
     .stProgress > div > div {
-        background: var(--gradient-primary) !important;
+        background: var(--primary) !important;
         border-radius: 4px;
     }
 
@@ -498,10 +499,103 @@ THEME_CSS = """
 
     /* Form styling */
     [data-testid="stForm"] {
-        background: var(--bg-secondary);
+        background: var(--bg-card);
         padding: 24px;
         border-radius: 12px;
         border: 1px solid var(--border-color);
+    }
+
+    /* Login card styling */
+    .login-card {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        max-width: 420px;
+        margin: 0 auto;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .login-header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #171717;
+        margin-bottom: 8px;
+    }
+
+    .login-header p {
+        font-size: 14px;
+        color: #525252;
+    }
+
+    .google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        padding: 12px 24px;
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #171717;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 24px;
+    }
+
+    .google-btn:hover {
+        background: #f5f5f5;
+        border-color: #d4d4d4;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 24px 0;
+    }
+
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e5e5e5;
+    }
+
+    .divider span {
+        padding: 0 16px;
+        font-size: 12px;
+        color: #a3a3a3;
+        text-transform: uppercase;
+    }
+
+    /* Quick Attendance Card */
+    .quick-attendance-card {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+        color: white;
+        margin-bottom: 32px;
+        box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    .quick-attendance-card h2 {
+        color: white !important;
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .quick-attendance-card p {
+        color: rgba(255,255,255,0.9) !important;
+        margin-bottom: 20px;
     }
 
     /* Hide Streamlit branding */
@@ -548,18 +642,38 @@ def init_session_state():
 
 
 def show_role_selection():
-    """Show role selection page - Student or Admin"""
+    """Show role selection page - Quick Attendance at top, Login portals below"""
     st.markdown("""
-    <div style="text-align:center;padding:50px 0 30px;">
-        <h1 style="font-size:48px;margin-bottom:12px;font-weight:700;letter-spacing:-1px;">AttendEase</h1>
-        <p style="font-size:14px;opacity:0.6;letter-spacing:2px;text-transform:uppercase;">Smart Face Recognition Attendance</p>
+    <div style="text-align:center;padding:40px 0 20px;">
+        <h1 style="font-size:42px;margin-bottom:8px;font-weight:700;letter-spacing:-1px;color:#171717;">AttendEase</h1>
+        <p style="font-size:14px;color:#525252;letter-spacing:1px;">Smart Face Recognition Attendance System</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='text-align:center;margin-bottom:40px;font-weight:400;font-size:15px;opacity:0.7;'>Select your portal to continue</p>", unsafe_allow_html=True)
-
+    # Quick Attendance - Featured at top
     col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div class="quick-attendance-card">
+            <h2>Quick Attendance</h2>
+            <p>Scan your face to mark attendance instantly - no login required</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Scan Face Now", key="quick_attendance_btn", use_container_width=True, type="primary"):
+            st.session_state.page = 'quick_attendance'
+            st.rerun()
 
+    # Divider
+    st.markdown("""
+    <div style="display:flex;align-items:center;margin:40px 0;">
+        <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+        <span style="padding:0 20px;font-size:12px;color:#a3a3a3;text-transform:uppercase;letter-spacing:2px;">or sign in to your account</span>
+        <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Login Portals - Side by side
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         col_a, col_b = st.columns(2)
 
@@ -567,11 +681,11 @@ def show_role_selection():
             st.markdown("""
             <div class="role-card">
                 <div class="role-icon">S</div>
-                <div class="role-title">Student</div>
+                <div class="role-title">Student Portal</div>
                 <div class="role-desc">Mark attendance, view records, and manage your profile</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Student Portal", key="student_btn", use_container_width=True):
+            if st.button("Student Login", key="student_btn", use_container_width=True):
                 st.session_state.selected_role = 'student'
                 st.session_state.page = 'student_login'
                 st.rerun()
@@ -580,51 +694,52 @@ def show_role_selection():
             st.markdown("""
             <div class="role-card">
                 <div class="role-icon">A</div>
-                <div class="role-title">Admin</div>
+                <div class="role-title">Admin Portal</div>
                 <div class="role-desc">Manage students, train model, and view reports</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Admin Portal", key="admin_btn", use_container_width=True):
+            if st.button("Admin Login", key="admin_btn", use_container_width=True):
                 st.session_state.selected_role = 'admin'
                 st.session_state.page = 'admin_login'
                 st.rerun()
 
-    # Quick Attendance Section
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;font-size:12px;margin-bottom:20px;opacity:0.4;letter-spacing:3px;text-transform:uppercase;'>or</p>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("""
-        <div class="role-card">
-            <div class="role-icon">Q</div>
-            <div class="role-title">Quick Attendance</div>
-            <div class="role-desc">Scan your face to mark attendance instantly without logging in</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Scan Face Now", key="quick_attendance_btn", use_container_width=True):
-            st.session_state.page = 'quick_attendance'
-            st.rerun()
-
 
 def show_student_login():
-    """Show student login page"""
-    col1, col2, col3 = st.columns([1, 2, 1])
+    """Show student login page - Conventional style with Google option"""
+    col1, col2, col3 = st.columns([1, 1.2, 1])
 
     with col2:
+        # Login Card Header
         st.markdown("""
-        <div style="text-align:center;padding:40px 0 30px;">
-            <div class="role-icon" style="margin:0 auto 20px;">S</div>
-            <h1 style="font-size:28px;margin-bottom:8px;font-weight:600;">Student Portal</h1>
-            <p style="font-size:14px;opacity:0.6;">Login to access your dashboard</p>
+        <div style="text-align:center;padding:30px 0 20px;">
+            <div class="role-icon" style="margin:0 auto 16px;width:56px;height:56px;font-size:22px;">S</div>
+            <h1 style="font-size:24px;margin-bottom:6px;font-weight:600;color:#171717;">Student Login</h1>
+            <p style="font-size:14px;color:#525252;">Sign in to access your dashboard</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown('<div class="stat-card" style="padding:32px;">', unsafe_allow_html=True)
-        username = st.text_input("Username", placeholder="Enter your username", key="student_username")
+        # Google Sign In Button (Visual only - placeholder)
+        st.markdown("""
+        <div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;margin-bottom:20px;transition:all 0.2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            <span style="font-size:14px;font-weight:500;color:#171717;">Continue with Google</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Divider
+        st.markdown("""
+        <div style="display:flex;align-items:center;margin:20px 0;">
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+            <span style="padding:0 16px;font-size:12px;color:#a3a3a3;">or continue with email</span>
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Login Form
+        username = st.text_input("Email or Username", placeholder="Enter your email or username", key="student_username")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="student_password")
 
-        if st.button("Login", use_container_width=True, key="student_login_btn"):
+        if st.button("Sign In", use_container_width=True, key="student_login_btn", type="primary"):
             if username and password:
                 success, role, student_id = UserOperations.authenticate(username, password)
                 if success and role == 'student':
@@ -641,15 +756,18 @@ def show_student_login():
             else:
                 st.warning("Please enter username and password")
 
-        st.markdown("---")
+        # Register Link
+        st.markdown("""
+        <p style="text-align:center;margin-top:24px;font-size:14px;color:#525252;">
+            Don't have an account?
+        </p>
+        """, unsafe_allow_html=True)
 
-        if st.button("Create New Account", use_container_width=True, key="student_register_btn"):
+        if st.button("Create Account", use_container_width=True, key="student_register_btn"):
             st.session_state.page = 'student_register'
             st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
 
         if st.button("Back to Home", use_container_width=True, key="student_back_btn"):
             st.session_state.page = 'role_select'
@@ -730,23 +848,41 @@ def show_student_register():
 
 
 def show_admin_login():
-    """Show admin login page"""
-    col1, col2, col3 = st.columns([1, 2, 1])
+    """Show admin login page - Conventional style with Google option"""
+    col1, col2, col3 = st.columns([1, 1.2, 1])
 
     with col2:
+        # Login Card Header
         st.markdown("""
-        <div style="text-align:center;padding:40px 0 30px;">
-            <div class="role-icon" style="margin:0 auto 20px;">A</div>
-            <h1 style="font-size:28px;margin-bottom:8px;font-weight:600;">Admin Portal</h1>
-            <p style="font-size:14px;opacity:0.6;">Login to manage the system</p>
+        <div style="text-align:center;padding:30px 0 20px;">
+            <div class="role-icon" style="margin:0 auto 16px;width:56px;height:56px;font-size:22px;">A</div>
+            <h1 style="font-size:24px;margin-bottom:6px;font-weight:600;color:#171717;">Admin Login</h1>
+            <p style="font-size:14px;color:#525252;">Sign in to manage the system</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown('<div class="stat-card" style="padding:32px;">', unsafe_allow_html=True)
-        username = st.text_input("Username", placeholder="Enter admin username", key="admin_username")
-        password = st.text_input("Password", type="password", placeholder="Enter admin password", key="admin_password")
+        # Google Sign In Button (Visual only - placeholder)
+        st.markdown("""
+        <div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;margin-bottom:20px;transition:all 0.2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            <span style="font-size:14px;font-weight:500;color:#171717;">Continue with Google</span>
+        </div>
+        """, unsafe_allow_html=True)
 
-        if st.button("Login", use_container_width=True, key="admin_login_btn"):
+        # Divider
+        st.markdown("""
+        <div style="display:flex;align-items:center;margin:20px 0;">
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+            <span style="padding:0 16px;font-size:12px;color:#a3a3a3;">or continue with email</span>
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Login Form
+        username = st.text_input("Email or Username", placeholder="Enter your email or username", key="admin_username")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="admin_password")
+
+        if st.button("Sign In", use_container_width=True, key="admin_login_btn", type="primary"):
             if username and password:
                 success, role, student_id = UserOperations.authenticate(username, password)
                 if success and role == 'admin':
@@ -763,16 +899,25 @@ def show_admin_login():
             else:
                 st.warning("Please enter username and password")
 
-        st.markdown("---")
-        st.info("**Default:** admin / admin123")
+        # Default credentials info
+        st.markdown("""
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-top:16px;">
+            <p style="font-size:13px;color:#9a3412;margin:0;"><strong>Default credentials:</strong> admin / admin123</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Register Link
+        st.markdown("""
+        <p style="text-align:center;margin-top:24px;font-size:14px;color:#525252;">
+            Need an admin account?
+        </p>
+        """, unsafe_allow_html=True)
 
         if st.button("Register New Admin", use_container_width=True, key="admin_register_nav_btn"):
             st.session_state.page = 'admin_register_self'
             st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
 
         if st.button("Back to Home", use_container_width=True, key="admin_back_btn"):
             st.session_state.page = 'role_select'
@@ -868,11 +1013,11 @@ def show_student_dashboard():
     with col1:
         st.markdown(f'<div class="stat-card"><div class="stat-value">{stats["total"]}</div><div class="stat-label">Total Classes</div></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#10b981;">{stats["present"]}</div><div class="stat-label">Present</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#22c55e;">{stats["present"]}</div><div class="stat-label">Present</div></div>', unsafe_allow_html=True)
     with col3:
         st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#ef4444;">{stats["absent"]}</div><div class="stat-label">Absent</div></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#4f46e5;">{stats["percentage"]}%</div><div class="stat-label">Attendance</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#f97316;">{stats["percentage"]}%</div><div class="stat-label">Attendance</div></div>', unsafe_allow_html=True)
 
     # Recent attendance
     st.markdown('<div class="section-title">Recent Attendance</div>', unsafe_allow_html=True)
@@ -937,7 +1082,7 @@ def show_mark_attendance():
 
     with col2:
         status = "Present" if already_marked else "Pending"
-        color = "#10b981" if already_marked else "#f59e0b"
+        color = "#22c55e" if already_marked else "#f97316"
         st.markdown(f"""
         <div class="stat-card">
             <div class="stat-value" style="color:{color};font-size:24px;">{status}</div>
@@ -948,7 +1093,7 @@ def show_mark_attendance():
         # Show face registration status
         if not already_marked:
             face_status = "Registered" if face_registered else "Not Registered"
-            face_color = "#10b981" if face_registered else "#ef4444"
+            face_color = "#22c55e" if face_registered else "#ef4444"
             st.markdown(f"""
             <div class="stat-card" style="margin-top:15px;">
                 <div class="stat-value" style="color:{face_color};font-size:18px;">{face_status}</div>
@@ -1082,7 +1227,7 @@ def show_student_profile():
             <div class="profile-avatar">{initial}</div>
             <h3>{student.name if student else 'Student'}</h3>
             <p style="color:#64748b;">{student.student_id if student else ''}</p>
-            <p style="color:#4f46e5;">{student.department if student else ''}</p>
+            <p style="color:#f97316;">{student.department if student else ''}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1258,11 +1403,11 @@ def show_admin_dashboard():
     with col1:
         st.markdown(f'<div class="stat-card"><div class="stat-value">{total_students}</div><div class="stat-label">Total Students</div></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#10b981;">{today_attendance}</div><div class="stat-label">Present Today</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#22c55e;">{today_attendance}</div><div class="stat-label">Present Today</div></div>', unsafe_allow_html=True)
     with col3:
         st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#ef4444;">{absent}</div><div class="stat-label">Absent Today</div></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#4f46e5;">{rate}%</div><div class="stat-label">Attendance Rate</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-value" style="color:#f97316;">{rate}%</div><div class="stat-label">Attendance Rate</div></div>', unsafe_allow_html=True)
 
     st.markdown('<div class="section-title">Today\'s Attendance</div>', unsafe_allow_html=True)
     records = AttendanceOperations.get_daily_attendance()
@@ -1306,7 +1451,7 @@ def show_admin_students():
             st.markdown(f"""
             <div class="attendance-row" style="display:flex;justify-content:space-between;align-items:center;">
                 <div><strong>{student.name}</strong><br><span style="font-size:12px;color:#64748b;">{student.student_id} | {student.department or 'N/A'}</span></div>
-                <div><span style="font-size:12px;color:#4f46e5;font-weight:600;">{stats['percentage']}%</span> <span class="{face_status}" style="margin-left:10px;">{face_text}</span></div>
+                <div><span style="font-size:12px;color:#f97316;font-weight:600;">{stats['percentage']}%</span> <span class="{face_status}" style="margin-left:10px;">{face_text}</span></div>
             </div>
             """, unsafe_allow_html=True)
         with col2:
@@ -1339,7 +1484,7 @@ def show_admin_edit_student():
     st.markdown(f"""
     <div class="stat-card" style="text-align:left;margin-bottom:20px;">
         <strong style="color:#1e293b;">Student ID:</strong> <span style="color:#64748b;">{student.student_id}</span><br>
-        <strong style="color:#1e293b;">Face Status:</strong> <span style="color:{'#10b981' if student.face_encoding else '#ef4444'};">{'Registered' if student.face_encoding else 'Not Registered'}</span><br>
+        <strong style="color:#171717;">Face Status:</strong> <span style="color:{'#22c55e' if student.face_encoding else '#ef4444'};">{'Registered' if student.face_encoding else 'Not Registered'}</span><br>
         <strong style="color:#1e293b;">Images:</strong> <span style="color:#64748b;">{student.image_count or 0}</span>
     </div>
     """, unsafe_allow_html=True)
