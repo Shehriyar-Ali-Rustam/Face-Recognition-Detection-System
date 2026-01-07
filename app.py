@@ -672,36 +672,34 @@ def show_role_selection():
     </div>
     """, unsafe_allow_html=True)
 
-    # Login Portals - Side by side
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        col_a, col_b = st.columns(2)
+    # Login Portals - Side by side with equal spacing
+    col1, col_a, col_b, col4 = st.columns([1, 1, 1, 1])
 
-        with col_a:
-            st.markdown("""
-            <div class="role-card">
-                <div class="role-icon">S</div>
-                <div class="role-title">Student Portal</div>
-                <div class="role-desc">Mark attendance, view records, and manage your profile</div>
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("Student Login", key="student_btn", use_container_width=True):
-                st.session_state.selected_role = 'student'
-                st.session_state.page = 'student_login'
-                st.rerun()
+    with col_a:
+        st.markdown("""
+        <div class="role-card" style="min-height:220px;">
+            <div class="role-icon">S</div>
+            <div class="role-title">Student Portal</div>
+            <div class="role-desc">Mark attendance and view your records</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Student Login", key="student_btn", use_container_width=True):
+            st.session_state.selected_role = 'student'
+            st.session_state.page = 'student_login'
+            st.rerun()
 
-        with col_b:
-            st.markdown("""
-            <div class="role-card">
-                <div class="role-icon">A</div>
-                <div class="role-title">Admin Portal</div>
-                <div class="role-desc">Manage students, train model, and view reports</div>
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("Admin Login", key="admin_btn", use_container_width=True):
-                st.session_state.selected_role = 'admin'
-                st.session_state.page = 'admin_login'
-                st.rerun()
+    with col_b:
+        st.markdown("""
+        <div class="role-card" style="min-height:220px;">
+            <div class="role-icon">A</div>
+            <div class="role-title">Admin Portal</div>
+            <div class="role-desc">Manage students and view reports</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Admin Login", key="admin_btn", use_container_width=True):
+            st.session_state.selected_role = 'admin'
+            st.session_state.page = 'admin_login'
+            st.rerun()
 
 
 def show_student_login():
