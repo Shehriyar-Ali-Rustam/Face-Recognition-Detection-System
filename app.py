@@ -49,7 +49,7 @@ THEME_CSS = """
         --bg-primary: #ffffff;
         --bg-secondary: #fafafa;
         --bg-card: #ffffff;
-        --bg-sidebar: #171717;
+        --bg-sidebar: #ffffff;
 
         /* Text Colors - Black */
         --text-primary: #171717;
@@ -177,10 +177,10 @@ THEME_CSS = """
         color: var(--text-primary) !important;
     }
 
-    /* Sidebar - Black Theme with visible text */
+    /* Sidebar - White Theme with dark text */
     [data-testid="stSidebar"] {
         background: var(--bg-sidebar) !important;
-        border-right: 1px solid #262626;
+        border-right: 1px solid #e5e5e5;
     }
 
     [data-testid="stSidebar"] > div:first-child {
@@ -189,28 +189,28 @@ THEME_CSS = """
     }
 
     [data-testid="stSidebar"] * {
-        color: #fafafa !important;
+        color: #171717 !important;
     }
 
     [data-testid="stSidebar"] .stMarkdown h3 {
-        color: #ffffff !important;
+        color: #171717 !important;
         font-weight: 600;
         font-size: 16px;
     }
 
     [data-testid="stSidebar"] .stMarkdown p {
-        color: #a3a3a3 !important;
+        color: #525252 !important;
     }
 
     [data-testid="stSidebar"] hr {
-        border-color: #404040 !important;
+        border-color: #e5e5e5 !important;
     }
 
     [data-testid="stSidebar"] .stButton > button {
         background: transparent !important;
         border: none !important;
         border-radius: 8px !important;
-        color: #d4d4d4 !important;
+        color: #525252 !important;
         padding: 12px 16px !important;
         text-align: left !important;
         font-weight: 500 !important;
@@ -349,7 +349,7 @@ THEME_CSS = """
 
     /* Header bar */
     .header-bar {
-        background: var(--bg-sidebar);
+        background: var(--primary);
         padding: 24px 28px;
         border-radius: 12px;
         margin-bottom: 24px;
@@ -363,7 +363,7 @@ THEME_CSS = """
     }
 
     .header-bar p {
-        color: rgba(255,255,255,0.7) !important;
+        color: rgba(255,255,255,0.9) !important;
         margin: 6px 0 0 0;
     }
 
