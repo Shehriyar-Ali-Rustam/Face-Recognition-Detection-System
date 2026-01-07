@@ -98,6 +98,155 @@ class UserOperations:
         finally:
             session.close()
 
+    @staticmethod
+    def create_user_with_email(username: str, email: str, password: str, role: str = 'student',
+                                student_id: str = None) -> tuple:
+        """Create a new user with email"""
+        session = get_session()
+        try:
+            hashed_pw = UserOperations.hash_password(password)
+            user = User(
+                username=username,
+                email=email,
+                password=hashed_pw,
+                role=role,
+                student_id=student_id
+            )
+            session.add(user)
+            session.commit()
+            return True, "User created successfully"
+        except IntegrityError:
+            session.rollback()
+            return False, "Username already exists"
+        except Exception as e:
+            session.rollback()
+            return False, f"Error: {str(e)}"
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_user_by_email(email: str):
+        """Get user by email"""
+        session = get_session()
+        try:
+            return session.query(User).filter(User.email == email).first()
+        finally:
+            session.close()
+
+    @staticmethod
+    def set_reset_token(email: str, token: str) -> tuple:
+        """Set password reset token for a user"""
+        session = get_session()
+        try:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return False, "Email not found"
+            user.reset_token = token
+            user.reset_token_expiry = datetime.now() + timedelta(minutes=15)
+            session.commit()
+            return True, user.username
+        except Exception as e:
+            session.rollback()
+            return False, str(e)
+        finally:
+            session.close()
+
+    @staticmethod
+    def verify_reset_token(email: str, token: str) -> tuple:
+        """Verify password reset token"""
+        session = get_session()
+        try:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return False, "Email not found"
+            if not user.reset_token or user.reset_token != token:
+                return False, "Invalid reset code"
+            if not user.reset_token_expiry or datetime.now() > user.reset_token_expiry:
+                return False, "Reset code has expired"
+            return True, user.username
+        finally:
+            session.close()
+
+    @staticmethod
+    def reset_password_with_token(email: str, token: str, new_password: str) -> tuple:
+        """Reset password after verifying token"""
+        session = get_session()
+        try:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return False, "Email not found"
+            if not user.reset_token or user.reset_token != token:
+                return False, "Invalid reset code"
+            if not user.reset_token_expiry or datetime.now() > user.reset_token_expiry:
+                return False, "Reset code has expired"
+
+            # Update password and clear token
+            user.password = UserOperations.hash_password(new_password)
+            user.reset_token = None
+            user.reset_token_expiry = None
+            session.commit()
+            return True, "Password reset successfully"
+        except Exception as e:
+            session.rollback()
+            return False, str(e)
+        finally:
+            session.close()
+
+    @staticmethod
+    def create_or_update_google_user(google_id: str, email: str, name: str, picture: str = None,
+                                      role: str = 'student') -> tuple:
+        """Create or update user from Google OAuth"""
+        session = get_session()
+        try:
+            # Check if user exists with this Google ID
+            user = session.query(User).filter(User.google_id == google_id).first()
+
+            if user:
+                # Update existing user
+                user.last_login = datetime.now()
+                if picture:
+                    user.profile_picture = picture
+                session.commit()
+                return True, user.role, user.student_id, user.username
+
+            # Check if user exists with this email
+            user = session.query(User).filter(User.email == email).first()
+            if user:
+                # Link Google account to existing user
+                user.google_id = google_id
+                user.last_login = datetime.now()
+                if picture:
+                    user.profile_picture = picture
+                session.commit()
+                return True, user.role, user.student_id, user.username
+
+            # Create new user
+            username = email.split('@')[0]
+            # Ensure unique username
+            base_username = username
+            counter = 1
+            while session.query(User).filter(User.username == username).first():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            user = User(
+                username=username,
+                email=email,
+                password=UserOperations.hash_password(google_id),  # Use Google ID as password placeholder
+                role=role,
+                google_id=google_id,
+                profile_picture=picture
+            )
+            session.add(user)
+            session.commit()
+            return True, role, None, username
+
+        except Exception as e:
+            session.rollback()
+            return False, None, None, str(e)
+        finally:
+            session.close()
+
 
 class StudentOperations:
     """CRUD operations for students"""

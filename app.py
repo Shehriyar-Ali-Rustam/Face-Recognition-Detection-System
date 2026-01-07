@@ -782,9 +782,32 @@ def show_student_login():
         </div>
         """, unsafe_allow_html=True)
 
+        # Google Sign In Button
+        if st.button("Continue with Google", key="student_google_btn", use_container_width=True):
+            st.session_state.google_login_role = 'student'
+            st.session_state.page = 'google_login'
+            st.rerun()
+
+        # Divider
+        st.markdown("""
+        <div style="display:flex;align-items:center;margin:20px 0;">
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+            <span style="padding:0 16px;font-size:12px;color:#a3a3a3;">or continue with email</span>
+            <div style="flex:1;height:1px;background:#e5e5e5;"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
         # Login Form
         username = st.text_input("Email or Username", placeholder="Enter your email or username", key="student_username")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="student_password")
+
+        # Forgot Password Link
+        col_fp1, col_fp2 = st.columns([1, 1])
+        with col_fp2:
+            if st.button("Forgot Password?", key="student_forgot_pw", type="secondary"):
+                st.session_state.forgot_password_role = 'student'
+                st.session_state.page = 'forgot_password'
+                st.rerun()
 
         if st.button("Sign In", use_container_width=True, key="student_login_btn", type="primary"):
             if username and password:
@@ -876,8 +899,8 @@ def show_student_register():
                         semester=semester or None, section=section or None
                     )
                     if success:
-                        success2, msg2 = UserOperations.create_user(
-                            username=username, password=password,
+                        success2, msg2 = UserOperations.create_user_with_email(
+                            username=username, email=email or None, password=password,
                             role='student', student_id=student_id
                         )
                         if success2:
@@ -908,13 +931,11 @@ def show_admin_login():
         </div>
         """, unsafe_allow_html=True)
 
-        # Google Sign In Button (Visual only - placeholder)
-        st.markdown("""
-        <div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;margin-bottom:20px;transition:all 0.2s;">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            <span style="font-size:14px;font-weight:500;color:#171717;">Continue with Google</span>
-        </div>
-        """, unsafe_allow_html=True)
+        # Google Sign In Button
+        if st.button("Continue with Google", key="admin_google_btn", use_container_width=True):
+            st.session_state.google_login_role = 'admin'
+            st.session_state.page = 'google_login'
+            st.rerun()
 
         # Divider
         st.markdown("""
@@ -928,6 +949,14 @@ def show_admin_login():
         # Login Form
         username = st.text_input("Email or Username", placeholder="Enter your email or username", key="admin_username")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="admin_password")
+
+        # Forgot Password Link
+        col_fp1, col_fp2 = st.columns([1, 1])
+        with col_fp2:
+            if st.button("Forgot Password?", key="admin_forgot_pw", type="secondary"):
+                st.session_state.forgot_password_role = 'admin'
+                st.session_state.page = 'forgot_password'
+                st.rerun()
 
         if st.button("Sign In", use_container_width=True, key="admin_login_btn", type="primary"):
             if username and password:
@@ -1014,6 +1043,247 @@ def show_admin_register_self():
 
         if st.button("Back to Login", use_container_width=True):
             st.session_state.page = 'admin_login'
+            st.rerun()
+
+
+def show_forgot_password():
+    """Show forgot password page with email verification"""
+    from utils.email_service import generate_reset_code, send_reset_email
+
+    # Initialize session state for forgot password flow
+    if 'reset_step' not in st.session_state:
+        st.session_state.reset_step = 1
+    if 'reset_email' not in st.session_state:
+        st.session_state.reset_email = ''
+    if 'reset_code' not in st.session_state:
+        st.session_state.reset_code = ''
+
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+
+    with col2:
+        role = st.session_state.get('forgot_password_role', 'student')
+        role_icon = 'S' if role == 'student' else 'A'
+        role_title = 'Student' if role == 'student' else 'Admin'
+
+        # Header
+        st.markdown(f"""
+        <div style="text-align:center;padding:30px 0 20px;">
+            <div class="role-icon" style="margin:0 auto 16px;width:56px;height:56px;font-size:22px;">{role_icon}</div>
+            <h1 style="font-size:24px;margin-bottom:6px;font-weight:600;color:#171717;">Reset Password</h1>
+            <p style="font-size:14px;color:#525252;">{role_title} Account Recovery</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Step 1: Enter email
+        if st.session_state.reset_step == 1:
+            st.markdown("""
+            <div style="background:#fff7ed;border-radius:8px;padding:16px;margin-bottom:20px;">
+                <p style="font-size:14px;color:#9a3412;margin:0;">Enter your registered email address. We'll send you a verification code.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            email = st.text_input("Email Address", placeholder="Enter your registered email", key="reset_email_input")
+
+            if st.button("Send Reset Code", use_container_width=True, type="primary"):
+                if email:
+                    # Check if email exists
+                    user = UserOperations.get_user_by_email(email)
+                    if user:
+                        # Generate and send code
+                        code = generate_reset_code()
+                        success, username = UserOperations.set_reset_token(email, code)
+
+                        if success:
+                            result = send_reset_email(email, code, username)
+                            st.session_state.reset_email = email
+                            st.session_state.reset_code = code
+
+                            if result.get('demo_mode'):
+                                st.warning(f"Email not configured. Your reset code is: **{code}**")
+                                st.info("Set up SMTP_EMAIL and SMTP_PASSWORD environment variables to enable email sending.")
+                            else:
+                                st.success(f"Reset code sent to {email}")
+
+                            st.session_state.reset_step = 2
+                            st.rerun()
+                        else:
+                            st.error("Failed to generate reset code. Please try again.")
+                    else:
+                        st.error("No account found with this email address.")
+                else:
+                    st.warning("Please enter your email address")
+
+        # Step 2: Enter verification code
+        elif st.session_state.reset_step == 2:
+            st.markdown(f"""
+            <div style="background:#fff7ed;border-radius:8px;padding:16px;margin-bottom:20px;">
+                <p style="font-size:14px;color:#9a3412;margin:0;">Enter the 6-digit code sent to <strong>{st.session_state.reset_email}</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            code = st.text_input("Verification Code", placeholder="Enter 6-digit code", key="verify_code_input", max_chars=6)
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("Verify Code", use_container_width=True, type="primary"):
+                    if code:
+                        success, msg = UserOperations.verify_reset_token(st.session_state.reset_email, code)
+                        if success:
+                            st.session_state.reset_step = 3
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                    else:
+                        st.warning("Please enter the verification code")
+
+            with col_b:
+                if st.button("Resend Code", use_container_width=True):
+                    code = generate_reset_code()
+                    success, username = UserOperations.set_reset_token(st.session_state.reset_email, code)
+                    if success:
+                        result = send_reset_email(st.session_state.reset_email, code, username)
+                        st.session_state.reset_code = code
+                        if result.get('demo_mode'):
+                            st.warning(f"New reset code: **{code}**")
+                        else:
+                            st.success("New code sent!")
+                        st.rerun()
+
+        # Step 3: Set new password
+        elif st.session_state.reset_step == 3:
+            st.markdown("""
+            <div style="background:#dcfce7;border-radius:8px;padding:16px;margin-bottom:20px;">
+                <p style="font-size:14px;color:#166534;margin:0;">Code verified! Enter your new password below.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            new_password = st.text_input("New Password", type="password", placeholder="Enter new password", key="new_pass_input")
+            confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm new password", key="confirm_pass_input")
+
+            if st.button("Reset Password", use_container_width=True, type="primary"):
+                if new_password and confirm_password:
+                    if new_password == confirm_password:
+                        if len(new_password) >= 6:
+                            success, msg = UserOperations.reset_password_with_token(
+                                st.session_state.reset_email,
+                                st.session_state.reset_code,
+                                new_password
+                            )
+                            if success:
+                                st.success("Password reset successfully! Please login with your new password.")
+                                # Clear reset session state
+                                st.session_state.reset_step = 1
+                                st.session_state.reset_email = ''
+                                st.session_state.reset_code = ''
+                                # Redirect to login
+                                import time
+                                time.sleep(2)
+                                st.session_state.page = f"{role}_login"
+                                st.rerun()
+                            else:
+                                st.error(msg)
+                        else:
+                            st.error("Password must be at least 6 characters")
+                    else:
+                        st.error("Passwords do not match")
+                else:
+                    st.warning("Please fill in both password fields")
+
+        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back to Login", use_container_width=True):
+            st.session_state.reset_step = 1
+            st.session_state.reset_email = ''
+            st.session_state.reset_code = ''
+            st.session_state.page = f"{st.session_state.get('forgot_password_role', 'student')}_login"
+            st.rerun()
+
+
+def show_google_login():
+    """Show Google OAuth login page"""
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+
+    with col2:
+        role = st.session_state.get('google_login_role', 'student')
+        role_icon = 'G' if role == 'student' else 'G'
+        role_title = 'Student' if role == 'student' else 'Admin'
+
+        # Header
+        st.markdown(f"""
+        <div style="text-align:center;padding:30px 0 20px;">
+            <div class="role-icon" style="margin:0 auto 16px;width:56px;height:56px;font-size:22px;background:#4285F4;">G</div>
+            <h1 style="font-size:24px;margin-bottom:6px;font-weight:600;color:#171717;">Google Sign In</h1>
+            <p style="font-size:14px;color:#525252;">{role_title} Account</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Info about Google OAuth setup
+        st.markdown("""
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:24px;margin-bottom:24px;">
+            <h4 style="color:#9a3412;margin:0 0 12px 0;font-size:16px;">Google OAuth Configuration Required</h4>
+            <p style="font-size:14px;color:#9a3412;margin:0 0 16px 0;">
+                To enable Google Sign-In, you need to set up OAuth credentials in Google Cloud Console.
+            </p>
+            <div style="background:#ffffff;border-radius:8px;padding:16px;margin-bottom:16px;">
+                <p style="font-size:13px;color:#525252;margin:0 0 8px 0;font-weight:600;">Setup Steps:</p>
+                <ol style="font-size:13px;color:#525252;margin:0;padding-left:20px;">
+                    <li>Go to Google Cloud Console</li>
+                    <li>Create OAuth 2.0 credentials</li>
+                    <li>Set environment variables:
+                        <ul>
+                            <li>GOOGLE_CLIENT_ID</li>
+                            <li>GOOGLE_CLIENT_SECRET</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Demo mode - simulate Google login
+        st.markdown("""
+        <div style="background:#f5f5f5;border-radius:12px;padding:24px;margin-bottom:20px;">
+            <h4 style="color:#171717;margin:0 0 12px 0;font-size:16px;">Demo Mode</h4>
+            <p style="font-size:14px;color:#525252;margin:0 0 16px 0;">
+                Enter your Google email to simulate sign-in. In production, this would redirect to Google.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        email = st.text_input("Google Email", placeholder="yourname@gmail.com", key="google_email_input")
+        name = st.text_input("Display Name", placeholder="Your Name", key="google_name_input")
+
+        if st.button("Continue with Google (Demo)", use_container_width=True, type="primary"):
+            if email and name:
+                if '@' in email:
+                    # Simulate Google OAuth by creating/updating user
+                    google_id = f"google_{email.replace('@', '_').replace('.', '_')}"
+                    success, user_role, student_id, username = UserOperations.create_or_update_google_user(
+                        google_id=google_id,
+                        email=email,
+                        name=name,
+                        role=role
+                    )
+
+                    if success:
+                        st.session_state.logged_in = True
+                        st.session_state.user_role = user_role
+                        st.session_state.student_id = student_id
+                        st.session_state.username = username
+                        st.session_state.page = f"{user_role}_dashboard"
+                        st.success(f"Welcome, {name}!")
+                        st.rerun()
+                    else:
+                        st.error(f"Failed to sign in: {username}")
+                else:
+                    st.error("Please enter a valid email address")
+            else:
+                st.warning("Please enter both email and name")
+
+        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+
+        if st.button("Back to Login", use_container_width=True):
+            st.session_state.page = f"{st.session_state.get('google_login_role', 'student')}_login"
             st.rerun()
 
 
@@ -2280,6 +2550,10 @@ def main():
             show_admin_login()
         elif page == 'admin_register_self':
             show_admin_register_self()
+        elif page == 'forgot_password':
+            show_forgot_password()
+        elif page == 'google_login':
+            show_google_login()
         else:
             show_role_selection()
     else:

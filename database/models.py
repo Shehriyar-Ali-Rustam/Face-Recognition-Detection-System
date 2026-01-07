@@ -52,12 +52,19 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
+    email = Column(String(100), nullable=True, index=True)
     password = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False, default='student')
     student_id = Column(String(50), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
     last_login = Column(DateTime, nullable=True)
+    # Password reset fields
+    reset_token = Column(String(100), nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
+    # Google OAuth fields
+    google_id = Column(String(100), nullable=True, unique=True)
+    profile_picture = Column(Text, nullable=True)
 
     def __repr__(self):
         return f"<User(username={self.username}, role={self.role})>"
